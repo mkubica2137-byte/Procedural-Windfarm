@@ -2,45 +2,69 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Procedural Windfarm (Multiplayer WebRTC + VHS)</title>
+  <title>Procedural Windfarm: The Atmospheric Update</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 
   <style>
-    html, body { margin: 0; padding: 0; overflow: hidden; background: #050505; font-family: monospace; }
-    #hud { position: fixed; left: 12px; bottom: 12px; color: #8f8; font-size: 14px; opacity: 0.8; pointer-events: none; text-shadow: 2px 2px 0 #000; z-index: 10; }
-    #hint { position: fixed; right: 12px; bottom: 12px; color: #fff; font-size: 14px; opacity: 0.7; pointer-events: none; text-shadow: 2px 2px 0 #000; z-index: 10; text-align: right; }
-    #crosshair { position: fixed; top: 50%; left: 50%; width: 4px; height: 4px; background: rgba(255,255,255,0.8); transform: translate(-50%, -50%); border-radius: 50%; pointer-events: none; z-index: 10; box-shadow: 0 0 4px #000; }
-    #blocker { position: absolute; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; color: #0f0; font-size: 24px; cursor: pointer; z-index: 30; text-transform: uppercase; text-shadow: 0 0 10px #0f0; }
+    html, body { margin: 0; padding: 0; overflow: hidden; background: #000; font-family: 'Courier New', monospace; user-select: none; }
+    #hud { position: fixed; left: 15px; bottom: 15px; color: #fff; font-size: 13px; opacity: 0.9; pointer-events: none; text-shadow: 1px 1px 4px #000; z-index: 10; font-weight: bold;}
+    #hint { position: fixed; right: 15px; bottom: 15px; color: #fff; font-size: 13px; opacity: 0.9; pointer-events: none; text-shadow: 1px 1px 4px #000; z-index: 10; text-align: right; font-weight: bold;}
+    #crosshair { position: fixed; top: 50%; left: 50%; width: 4px; height: 4px; background: rgba(255,255,255,0.9); transform: translate(-50%, -50%); border-radius: 50%; pointer-events: none; z-index: 10; box-shadow: 0 0 5px rgba(0,0,0,0.8); mix-blend-mode: difference;}
+    #blocker { position: absolute; width: 100%; height: 100%; background: radial-gradient(circle, #1a1a1a 0%, #000000 100%); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 20px; cursor: pointer; z-index: 30; text-transform: uppercase; letter-spacing: 4px; transition: opacity 0.5s; }
     
-    /* CRT Scanline Overlay */
-    body::after { content: " "; display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06)); z-index: 2; background-size: 100% 2px, 3px 100%; pointer-events: none; }
+    body::after { content: " "; display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06)); z-index: 2; background-size: 100% 2px, 3px 100%; pointer-events: none; mix-blend-mode: overlay;}
 
-    /* Interactive Phone Overlay */
-    #phone { position: fixed; bottom: -650px; right: 50px; width: 300px; height: 600px; background: #0a0a0a; border-radius: 40px; border: 8px solid #222; transition: bottom 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 15; padding: 10px; box-shadow: 0 15px 40px rgba(0,0,0,0.9), inset 0 0 15px rgba(255,255,255,0.05); }
-    #phone.active { bottom: 30px; }
-    #phone .screen { background: radial-gradient(circle at top left, #2b3a4a, #0b1015); height: 100%; border-radius: 30px; overflow: hidden; position: relative; color: white; text-align: center; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; box-shadow: inset 0 0 20px rgba(0,0,0,0.8); pointer-events: auto;}
+    /* Advanced Phone UI */
+    #phone { position: fixed; bottom: -700px; right: 40px; width: 320px; height: 650px; background: #050505; border-radius: 45px; border: 10px solid #1c1c1c; transition: bottom 0.6s cubic-bezier(0.2, 1, 0.3, 1); z-index: 15; padding: 12px; box-shadow: 0 25px 50px rgba(0,0,0,0.9), inset 0 0 20px rgba(255,255,255,0.05); }
+    #phone.active { bottom: 20px; }
+    #phone .screen { background: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=600&auto=format&fit=crop') center/cover; height: 100%; border-radius: 35px; overflow: hidden; position: relative; color: white; text-align: center; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; box-shadow: inset 0 0 30px rgba(0,0,0,0.9); pointer-events: auto;}
+    #phone .screen::before { content: ''; position: absolute; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(5px); z-index: 0; }
     
-    #phone .notch { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 130px; height: 28px; background: #0a0a0a; border-bottom-left-radius: 18px; border-bottom-right-radius: 18px; z-index: 20; }
-    #phone .status-bar { display: flex; justify-content: space-between; padding: 8px 20px 0 20px; font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.9); z-index: 10; position: relative; }
+    #phone .notch { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 140px; height: 32px; background: #050505; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; z-index: 20; box-shadow: inset 0 -2px 5px rgba(255,255,255,0.05); }
+    #phone .status-bar { display: flex; justify-content: space-between; padding: 10px 24px 0 24px; font-size: 12px; font-weight: 600; color: #fff; z-index: 10; position: relative; text-shadow: 0 1px 3px rgba(0,0,0,0.8);}
     
-    #phone .time-container { margin-top: 50px; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
-    #phone .time { font-size: 56px; font-weight: 200; letter-spacing: 1px; line-height: 1; }
-    #phone .date { font-size: 15px; color: #a5b1c2; margin-top: 5px; font-weight: 500; }
+    #phone .time-container { margin-top: 60px; position: relative; z-index: 1; text-shadow: 0 4px 15px rgba(0,0,0,0.6); }
+    #phone .time { font-size: 64px; font-weight: 200; letter-spacing: -1px; line-height: 1; }
     
-    #phone .apps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; padding: 0 24px; margin-top: 40px; }
-    #phone .app { width: 100%; aspect-ratio: 1; border-radius: 14px; background-size: cover; box-shadow: 0 4px 10px rgba(0,0,0,0.4); position: relative; overflow: hidden; }
-    #phone .app::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 50%); pointer-events: none; }
-    
-    /* Multiplayer Widget on Phone */
-    #phone .mp-widget { margin: 30px 20px; padding: 15px; background: rgba(0,0,0,0.5); border-radius: 20px; backdrop-filter: blur(10px); font-size: 13px; color: #d1d8e0; border: 1px solid rgba(255,255,255,0.15); text-align: left; }
-    #phone .mp-widget strong { color: white; display: block; margin-bottom: 8px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;}
+    #phone .apps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px 12px; padding: 0 20px; margin-top: 30px; position: relative; z-index: 1; }
+    #phone .app-container { display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: transform 0.1s;}
+    #phone .app-container:active { transform: scale(0.9); }
+    #phone .app { width: 55px; height: 55px; border-radius: 16px; background-size: cover; box-shadow: 0 5px 15px rgba(0,0,0,0.5); position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: center; align-items: center; font-size: 24px;}
+    #phone .app::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 50%); pointer-events: none; }
+    #phone .app-label { font-size: 11px; margin-top: 6px; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.8); font-weight: 500;}
+
+    #phone .mp-widget { margin: 25px 20px; padding: 15px; background: rgba(20,20,20,0.6); border-radius: 20px; backdrop-filter: blur(15px); font-size: 13px; color: #e0e0e0; border: 1px solid rgba(255,255,255,0.1); text-align: left; position: relative; z-index: 1; box-shadow: 0 10px 20px rgba(0,0,0,0.3);}
     #phone .mp-controls { display: flex; justify-content: space-between; margin-top: 12px; }
-    #phone .btn { background: #007aff; color: white; border: none; padding: 10px 0; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: bold; width: 48%; transition: background 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.3);}
-    #phone .btn:hover { background: #0056b3; }
-    #phone .btn-green { background: #34c759; }
-    #phone .btn-green:hover { background: #248a3d; }
+    #phone .btn { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 10px 0; border-radius: 12px; cursor: pointer; font-size: 13px; font-weight: 600; width: 48%; backdrop-filter: blur(5px); transition: all 0.2s;}
+    #phone .btn:hover { background: rgba(255,255,255,0.2); transform: translateY(-2px);}
+
+    /* Sub-Apps */
+    .app-screen { display: none; position: absolute; inset: 0; background: #111; z-index: 50; flex-direction: column; }
+    .app-header { padding: 40px 15px 15px; background: #222; text-align: left; font-weight: bold; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center;}
+    .close-btn { background: none; border: none; color: #0a84ff; font-size: 16px; cursor: pointer; }
+    
+    /* Contacts App */
+    #chat-log { flex: 1; overflow-y: auto; padding: 10px; font-size: 13px; text-align: left; color: #fff; display: flex; flex-direction: column; gap: 8px;}
+    .chat-msg { background: #333; padding: 8px 12px; border-radius: 15px; width: fit-content; max-width: 80%; word-wrap: break-word;}
+    .chat-msg.self { background: #0a84ff; align-self: flex-end; }
+    #chat-input-area { padding: 10px; display: flex; gap: 5px; background: #222;}
+    #chat-input { flex: 1; border-radius: 15px; border: none; padding: 8px 12px; background: #000; color: #fff; outline: none;}
+    #chat-send { background: #0a84ff; color: #fff; border: none; border-radius: 15px; padding: 0 15px; font-weight: bold; cursor: pointer;}
+    
+    /* Music App */
+    .music-controls { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 20px;}
+    .toggle-btn { width: 120px; height: 120px; border-radius: 50%; background: #333; border: 4px solid #444; color: #fff; font-size: 18px; cursor: pointer; transition: all 0.2s;}
+    .toggle-btn.active { background: #34c759; border-color: #248a3d; box-shadow: 0 0 20px #34c759;}
+
+    /* Build App Styles */
+    .build-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 15px; overflow-y: auto; flex: 1; align-content: start;}
+    .build-item-btn { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; border-radius: 14px; padding: 12px 10px; font-size: 12px; cursor: pointer; font-weight: bold; display: flex; flex-direction: column; align-items: center; gap: 5px; transition: all 0.2s; }
+    .build-item-btn:hover { background: rgba(255,255,255,0.15); transform: translateY(-2px); }
+
+    /* Camera Flash */
+    #flash { position: fixed; inset: 0; background: #fff; opacity: 0; pointer-events: none; z-index: 100; transition: opacity 0.1s; }
   </style>
 
   <script type="importmap">
@@ -53,10 +77,11 @@
   </script>
 </head>
 <body>
-<div id="blocker">Click to Initialize Audio & Simulation</div>
+<div id="blocker"><span>Initialize Link</span></div>
 <div id="crosshair"></div>
-<div id="hud">WASD / Mouse • Walk | [P] Toggle Phone</div>
-<div id="hint">Status: <span id="timeDisplay">Day</span></div>
+<div id="hud">W A S D - MOVE | MOUSE - LOOK | P - PHONE <br><span id="buildStatus" style="color: #ffcc00; display: none;">BUILD MODE (GRID ACTIVE) - CLICK TO PLACE</span></div>
+<div id="hint">ENV: <span id="timeDisplay">SYNCING...</span></div>
+<div id="flash"></div>
 
 <div id="phone">
   <div class="screen">
@@ -65,33 +90,86 @@
       <span class="signal">ill LTE</span>
       <span class="battery">14% ⚡</span>
     </div>
-    
     <div class="time-container">
       <div class="time" id="phoneTime">--:--</div>
-      <div class="date" id="phoneDate">Local Game Time</div>
     </div>
     
     <div class="mp-widget">
-      <strong>Network / WebRTC</strong>
-      <div style="margin-bottom: 5px;">Status: <span id="mp-status" style="color: #ffcc00;">Offline</span></div>
+      <div style="margin-bottom: 8px; font-weight: 600; letter-spacing: 1px;">PEER LINK</div>
+      <div style="margin-bottom: 5px; font-size: 11px;">STATE: <span id="mp-status" style="color: #4cd964;">AWAITING</span></div>
       <div class="mp-controls">
-        <button id="btnHost" class="btn">Host Game</button>
-        <button id="btnJoin" class="btn btn-green">Join Game</button>
+        <button id="btnHost" class="btn">HOST</button>
+        <button id="btnJoin" class="btn">JOIN</button>
       </div>
     </div>
 
     <div class="apps">
-      <div class="app" style="background: linear-gradient(135deg, #4cd964, #34c759)"></div>
-      <div class="app" style="background: linear-gradient(135deg, #007aff, #0056b3)"></div>
-      <div class="app" style="background: linear-gradient(135deg, #ffcc00, #ff9500)"></div>
-      <div class="app" style="background: linear-gradient(135deg, #ff3b30, #c51f1a)"></div>
-      <div class="app" style="background: linear-gradient(135deg, #5856d6, #3f3cbb)"></div>
-      <div class="app" style="background: linear-gradient(135deg, #ff2d55, #d81b43)"></div>
-      <div class="app" style="background: #222"></div>
-      <div class="app" style="background: #e1e1e1"></div>
+      <div class="app-container" onclick="takePicture()"><div class="app" style="background: #e1e1e1; color: #000;">📷</div><span class="app-label">Camera</span></div>
+      <div class="app-container" onclick="openApp('contacts-app')"><div class="app" style="background: linear-gradient(135deg, #4cd964, #34c759)">💬</div><span class="app-label">Contacts</span></div>
+      <div class="app-container" onclick="openApp('music-app')"><div class="app" style="background: linear-gradient(135deg, #ff2d55, #d81b43)">🎵</div><span class="app-label">Music</span></div>
+      <div class="app-container" onclick="openApp('build-app')"><div class="app" style="background: linear-gradient(135deg, #ff9500, #ffcc00)">🔨</div><span class="app-label">Build</span></div>
+      <div class="app-container" onclick="openApp('weather-app')"><div class="app" style="background: linear-gradient(135deg, #5ac8fa, #007aff)">⛅</div><span class="app-label">Weather</span></div>
     </div>
+
+    <div id="contacts-app" class="app-screen">
+      <div class="app-header">
+        <span>Global Chat</span>
+        <button class="close-btn" onclick="closeApp('contacts-app')">Close</button>
+      </div>
+      <div id="chat-log"></div>
+      <div id="chat-input-area">
+        <input type="text" id="chat-input" placeholder="Message..." autocomplete="off" />
+        <button id="chat-send" onclick="sendChat()">Send</button>
+      </div>
+    </div>
+
+    <div id="music-app" class="app-screen">
+      <div class="app-header">
+        <span>Generative Ambient</span>
+        <button class="close-btn" onclick="closeApp('music-app')">Close</button>
+      </div>
+      <div class="music-controls">
+        <button id="musicToggle" class="toggle-btn" onclick="toggleMusic()">OFF</button>
+        <p style="color:#aaa; font-size:12px; text-align:center; padding:20px;">Procedural C-Minor Pentatonic Synth Engine</p>
+      </div>
+    </div>
+
+    <div id="build-app" class="app-screen">
+      <div class="app-header">
+        <span>Structure Builder</span>
+        <button class="close-btn" onclick="closeApp('build-app')">Close</button>
+      </div>
+      <div class="build-grid">
+        <button class="build-item-btn" onclick="selectBuild('floor')"><span style="font-size:20px;">🔲</span>Floor/Ceiling</button>
+        <button class="build-item-btn" onclick="selectBuild('wall')"><span style="font-size:20px;">🧱</span>Wall</button>
+        <button class="build-item-btn" onclick="selectBuild('window')"><span style="font-size:20px;">🪟</span>Window</button>
+        <button class="build-item-btn" onclick="selectBuild('stairs')"><span style="font-size:20px;">🪜</span>Stairs</button>
+        <button class="build-item-btn" onclick="selectBuild('chair')"><span style="font-size:20px;">🪑</span>Chair</button>
+        <button class="build-item-btn" onclick="selectBuild('table')"><span style="font-size:20px;">🪑</span>Table</button>
+        <button class="build-item-btn" onclick="selectBuild('lamp')"><span style="font-size:20px;">🏮</span>Street Lamp</button>
+        <button class="build-item-btn" onclick="selectBuild('light')"><span style="font-size:20px;">💡</span>Point Light</button>
+        <button class="build-item-btn" style="background: rgba(255,59,48,0.2); border-color: #ff3b30; grid-column: span 2;" onclick="selectBuild('none')">Cancel Mode</button>
+      </div>
+    </div>
+
+    <div id="weather-app" class="app-screen">
+      <div class="app-header">
+        <span>Atmosphere Engine</span>
+        <button class="close-btn" onclick="closeApp('weather-app')">Close</button>
+      </div>
+      <div class="music-controls">
+        <button id="weatherToggle" class="toggle-btn" onclick="toggleWeather()">CLEAR</button>
+        <p style="color:#aaa; font-size:12px; text-align:center; padding:20px;" id="weatherDesc">Dynamic particle simulation and mist density controller.</p>
+      </div>
+    </div>
+
   </div>
 </div>
+
+<script>
+  function openApp(id) { document.getElementById(id).style.display = 'flex'; }
+  function closeApp(id) { document.getElementById(id).style.display = 'none'; }
+</script>
 
 <script type="module">
 import * as THREE from 'three';
@@ -99,141 +177,547 @@ import { PointerLockControls } from 'three/addons/controls/PointerLockControls.j
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 
-// ---------- SYNTHESIZED AUDIO ENGINE ----------
+// ---------- ADVANCED SPATIAL AUDIO ENGINE ----------
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 const audioCtx = new AudioContext();
+
+const listener = new THREE.AudioListener();
 
 const stepBufferSize = audioCtx.sampleRate * 0.15;
 const stepBuffer = audioCtx.createBuffer(1, stepBufferSize, audioCtx.sampleRate);
 const stepData = stepBuffer.getChannelData(0);
-for (let i = 0; i < stepBufferSize; i++) { stepData[i] = (Math.random() * 2 - 1) * Math.exp(-i / (audioCtx.sampleRate * 0.05)); }
+for (let i = 0; i < stepBufferSize; i++) { stepData[i] = (Math.random() * 2 - 1) * Math.exp(-i / (audioCtx.sampleRate * 0.04)); }
 
 function playFootstep() {
   if (audioCtx.state === 'suspended') return;
   const noiseSource = audioCtx.createBufferSource();
   noiseSource.buffer = stepBuffer;
-  const filter = audioCtx.createBiquadFilter();
-  filter.type = 'bandpass';
-  filter.frequency.value = 500 + Math.random() * 400; 
-  filter.Q.value = 0.8;
-  const gain = audioCtx.createGain();
-  gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
-  noiseSource.connect(filter);
-  filter.connect(gain);
-  gain.connect(audioCtx.destination);
+  const filter = audioCtx.createBiquadFilter(); filter.type = 'lowpass'; filter.frequency.value = 800 + Math.random() * 200; 
+  const gain = audioCtx.createGain(); gain.gain.setValueAtTime(0.6, audioCtx.currentTime);
+  noiseSource.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination);
   noiseSource.start();
 }
 
+function createBirdPanner() {
+  const panner = audioCtx.createPanner();
+  panner.panningModel = 'HRTF';
+  panner.distanceModel = 'inverse';
+  panner.refDistance = 10;
+  panner.maxDistance = 300;
+  panner.rolloffFactor = 1;
+  panner.connect(audioCtx.destination);
+  return panner;
+}
+
+function playBirdChirp(panner) {
+  if (audioCtx.state === 'suspended') return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(2000 + Math.random() * 1500, audioCtx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.2);
+  gain.gain.setValueAtTime(0.15, audioCtx.currentTime); 
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+  osc.connect(gain); gain.connect(panner);
+  osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+}
+
+// Generative Music System
+let musicEnabled = false;
+const scale = [261.63, 311.13, 349.23, 392.00, 466.16]; 
+let nextNoteTime = 0;
+
+window.toggleMusic = function() {
+  musicEnabled = !musicEnabled;
+  const btn = document.getElementById('musicToggle');
+  if(musicEnabled) {
+    btn.classList.add('active'); btn.innerText = "ON";
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    scheduleNextNote();
+  } else {
+    btn.classList.remove('active'); btn.innerText = "OFF";
+  }
+}
+
+function scheduleNextNote() {
+  if(!musicEnabled) return;
+  if(audioCtx.currentTime > nextNoteTime) {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.value = scale[Math.floor(Math.random() * scale.length)] / 2;
+    
+    gain.gain.setValueAtTime(0, audioCtx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.06, audioCtx.currentTime + 4);
+    gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 10);
+    
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.start(audioCtx.currentTime); osc.stop(audioCtx.currentTime + 10);
+    
+    nextNoteTime = audioCtx.currentTime + 3 + Math.random() * 6; 
+  }
+  if(musicEnabled) setTimeout(scheduleNextNote, 1000);
+}
+
 let windFilter;
-function startWind() {
+function startAudio() {
   const windBufferSize = audioCtx.sampleRate * 2;
   const windBuffer = audioCtx.createBuffer(1, windBufferSize, audioCtx.sampleRate);
   const windData = windBuffer.getChannelData(0);
   for (let i = 0; i < windBufferSize; i++) { windData[i] = Math.random() * 2 - 1; }
   
-  const windSource = audioCtx.createBufferSource();
-  windSource.buffer = windBuffer;
-  windSource.loop = true;
-  
-  windFilter = audioCtx.createBiquadFilter();
-  windFilter.type = 'lowpass';
-  windFilter.frequency.value = 300; 
-  const windGain = audioCtx.createGain();
-  windGain.gain.value = 0.15;
-  
-  const rumbleFilter = audioCtx.createBiquadFilter();
-  rumbleFilter.type = 'lowpass';
-  rumbleFilter.frequency.value = 80;
-  const rumbleGain = audioCtx.createGain();
-  rumbleGain.gain.value = 0.6; 
-
-  windSource.connect(windFilter);
-  windFilter.connect(windGain);
-  windGain.connect(audioCtx.destination);
-
-  windSource.connect(rumbleFilter);
-  rumbleFilter.connect(rumbleGain);
-  rumbleGain.connect(audioCtx.destination);
-
+  const windSource = audioCtx.createBufferSource(); windSource.buffer = windBuffer; windSource.loop = true;
+  windFilter = audioCtx.createBiquadFilter(); windFilter.type = 'lowpass'; windFilter.frequency.value = 400; 
+  const windGain = audioCtx.createGain(); windGain.gain.value = 0.2;
+  windSource.connect(windFilter); windFilter.connect(windGain); windGain.connect(audioCtx.destination);
   windSource.start();
 }
 
-// ---------- PROCEDURAL TEXTURE GENERATOR ----------
-function createNoiseTexture(width, height, hex1, hex2, scale) {
-  const canvas = document.createElement('canvas');
-  canvas.width = width; canvas.height = height;
-  const ctx = canvas.getContext('2d');
-  const c1 = new THREE.Color(hex1);
-  const c2 = new THREE.Color(hex2);
-  const imgData = ctx.createImageData(width, height);
-  const data = imgData.data;
-
-  for (let i = 0; i < width * height; i++) {
-    const x = i % width;
-    const y = Math.floor(i / width);
-    const n = (Math.sin(x*scale) + Math.cos(y*scale) + Math.sin((x+y)*scale*0.5)) / 3;
-    const t = (n + 1) / 2; 
-    
-    data[i*4]   = (c1.r + (c2.r - c1.r) * t) * 255;
-    data[i*4+1] = (c1.g + (c2.g - c1.g) * t) * 255;
-    data[i*4+2] = (c1.b + (c2.b - c1.b) * t) * 255;
-    data[i*4+3] = 255;
-  }
-  ctx.putImageData(imgData, 0, 0);
-  const tex = new THREE.CanvasTexture(canvas);
-  tex.wrapS = THREE.RepeatWrapping;
-  tex.wrapT = THREE.RepeatWrapping;
-  tex.repeat.set(20, 20); 
-  return tex;
-}
-
-// ---------- BASIC SETUP ----------
+// ---------- HYPER-REALISTIC RENDERER SETUP ----------
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x87CEEB);
 
-const camera = new THREE.PerspectiveCamera(75, innerWidth/innerHeight, 0.1, 3500); 
-const renderer = new THREE.WebGLRenderer({ powerPreference: "high-performance", antialias: true });
+const camera = new THREE.PerspectiveCamera(70, innerWidth/innerHeight, 0.1, 5000); 
+camera.add(listener);
+
+const renderer = new THREE.WebGLRenderer({ powerPreference: "high-performance", antialias: false, preserveDrawingBuffer: true }); 
 renderer.setSize(innerWidth, innerHeight);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.1; 
+renderer.toneMappingExposure = 1.2;
 document.body.appendChild(renderer.domElement);
+
+// ---------- PROCEDURAL TERRAIN MAPS ----------
+function hash(x, y) { return fract(Math.sin(x * 12.9898 + y * 78.233) * 43758.5453); }
+function fract(x) { return x - Math.floor(x); }
+function noise(x, y) {
+  const ix = Math.floor(x), iy = Math.floor(y);
+  const fx = fract(x), fy = fract(y);
+  const ux = fx * fx * (3.0 - 2.0 * fx); const uy = fy * fy * (3.0 - 2.0 * fy);
+  return (hash(ix, iy) * (1 - ux) + hash(ix + 1, iy) * ux) * (1 - uy) + (hash(ix, iy + 1) * (1 - ux) + hash(ix + 1, iy + 1) * ux) * uy;
+}
+function fbm(x, z) {
+  let total = 0, amplitude = 1, frequency = 0.005, maxValue = 0;
+  for(let i=0; i<4; i++) { total += noise(x * frequency, z * frequency) * amplitude; maxValue += amplitude; amplitude *= 0.5; frequency *= 2.0; }
+  return (total / maxValue);
+}
+function getHeight(x, z) { return fbm(x, z) * 60; }
+
+function createPBRMaps(size, hex1, hex2, scale) {
+  const canvas = document.createElement('canvas'); canvas.width = size; canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  const c1 = new THREE.Color(hex1); const c2 = new THREE.Color(hex2);
+  const imgData = ctx.createImageData(size, size); const data = imgData.data;
+
+  for (let i = 0; i < size * size; i++) {
+    const x = i % size; const y = Math.floor(i / size);
+    const n = noise(x*scale, y*scale);
+    data[i*4] = (c1.r + (c2.r - c1.r) * n) * 255; data[i*4+1] = (c1.g + (c2.g - c1.g) * n) * 255;
+    data[i*4+2] = (c1.b + (c2.b - c1.b) * n) * 255; data[i*4+3] = 255;
+  }
+  ctx.putImageData(imgData, 0, 0);
+  const tex = new THREE.CanvasTexture(canvas); tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping; tex.repeat.set(50, 50); 
+  return tex;
+}
+
+// ---------- LIGHTING & ENVIRONMENT ----------
+const sunLight = new THREE.DirectionalLight(0xfff5e6, 4.0);
+sunLight.castShadow = true; 
+// OPTIMIZATION: Reduced shadow map size from 4096 to 2048 to fix lag
+sunLight.shadow.mapSize.width = 2048; sunLight.shadow.mapSize.height = 2048;
+sunLight.shadow.camera.near = 10; sunLight.shadow.camera.far = 2500;
+const d = 800; sunLight.shadow.camera.left = -d; sunLight.shadow.camera.right = d;
+sunLight.shadow.camera.top = d; sunLight.shadow.camera.bottom = -d; sunLight.shadow.bias = -0.0005;
+scene.add(sunLight);
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.2); scene.add(ambientLight);
+
+const flashlight = new THREE.SpotLight(0xfffaea, 0, 800, Math.PI/5, 0.6, 1.5);
+flashlight.castShadow = true; flashlight.shadow.mapSize.width = 1024; flashlight.shadow.mapSize.height = 1024;
+flashlight.position.set(0.5, -0.2, 0.5); flashlight.target.position.set(0, 0, -1);
+camera.add(flashlight); camera.add(flashlight.target);
+
+// Visible Celestial Bodies (Triggers Bloom)
+const sunMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(5.0, 4.8, 4.5) });
+const sunMesh = new THREE.Mesh(new THREE.SphereGeometry(80, 32, 32), sunMat);
+scene.add(sunMesh);
+
+const moonMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(1.2, 1.5, 2.0) });
+const moonMesh = new THREE.Mesh(new THREE.SphereGeometry(50, 32, 32), moonMat);
+scene.add(moonMesh);
+
+// ---------- NEW FEATURE: ADVANCED SKY GRADIENT DOME & STARS & CLOUDS ----------
+const skyGeo = new THREE.SphereGeometry(3500, 32, 15);
+const skyMat = new THREE.ShaderMaterial({
+  uniforms: {
+    topColor: { value: new THREE.Color(0x0a1424) },
+    bottomColor: { value: new THREE.Color(0x4a7a9c) },
+    offset: { value: 50 },
+    exponent: { value: 0.6 }
+  },
+  vertexShader: `
+    varying vec3 vWorldPosition;
+    void main() {
+      vec4 worldPosition = modelMatrix * vec4(position, 1.0);
+      vWorldPosition = worldPosition.xyz;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+  `,
+  fragmentShader: `
+    uniform vec3 topColor;
+    uniform vec3 bottomColor;
+    uniform float offset;
+    uniform float exponent;
+    varying vec3 vWorldPosition;
+    void main() {
+      float h = normalize(vWorldPosition + offset).y;
+      gl_FragColor = vec4(mix(bottomColor, topColor, max(pow(max(h, 0.0), exponent), 0.0)), 1.0);
+    }
+  `,
+  side: THREE.BackSide
+});
+const skyDome = new THREE.Mesh(skyGeo, skyMat);
+scene.add(skyDome);
+
+// Procedural Stars
+const starCount = 1500;
+const starGeo = new THREE.BufferGeometry();
+const starPositions = new Float32Array(starCount * 3);
+for(let i=0; i<starCount; i++) {
+  const theta = Math.random() * Math.PI * 2;
+  const phi = Math.acos((Math.random() * 2) - 1);
+  const r = 3300;
+  starPositions[i*3] = r * Math.sin(phi) * Math.cos(theta);
+  starPositions[i*3+1] = Math.abs(r * Math.sin(phi) * Math.sin(theta)); 
+  starPositions[i*3+2] = r * Math.cos(phi);
+}
+starGeo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 2.5, transparent: true, opacity: 0, sizeAttenuation: false });
+const starPoints = new THREE.Points(starGeo, starMat);
+scene.add(starPoints);
+
+// Volumetric Cloud Blocks
+const clouds = [];
+const cloudGroup = new THREE.Group();
+scene.add(cloudGroup);
+const cloudMaterial = new THREE.MeshPhysicalMaterial({ color: 0xeeeeee, roughness: 0.9, transparent: true, opacity: 0.35, transmission: 0.2, thickness: 0.5 });
+for(let i=0; i<25; i++) {
+  const cloud = new THREE.Group();
+  const layers = 3 + Math.floor(Math.random()*4);
+  for(let j=0; j<layers; j++) {
+    const bGeo = new THREE.DodecahedronGeometry(25 + Math.random()*25, 1);
+    const blob = new THREE.Mesh(bGeo, cloudMaterial);
+    blob.position.set((Math.random()-0.5)*50, (Math.random()-0.5)*10, (Math.random()-0.5)*50);
+    blob.scale.set(1.6, 0.5, 1.0);
+    cloud.add(blob);
+  }
+  cloud.position.set((Math.random()-0.5)*3000, 350 + Math.random()*100, (Math.random()-0.5)*3000);
+  cloudGroup.add(cloud);
+  clouds.push({ mesh: cloud, speed: 6 + Math.random()*12 });
+}
+
+// ---------- PBR TERRAIN ----------
+const SIZE = 4000; 
+// OPTIMIZATION: Terrain segments reduced from 512 to 128 (MASSIVE performance boost)
+const SEG = 128; 
+const terrainGeo = new THREE.PlaneGeometry(SIZE, SIZE, SEG, SEG); terrainGeo.rotateX(-Math.PI/2);
+const posAttr = terrainGeo.attributes.position;
+for(let i=0; i<posAttr.count; i++) posAttr.setY(i, getHeight(posAttr.getX(i), posAttr.getZ(i)));
+terrainGeo.computeVertexNormals();
+
+const groundTex = createPBRMaps(512, 0x151c10, 0x222e18, 0.02);
+const terrainMat = new THREE.MeshPhysicalMaterial({ map: groundTex, roughness: 0.85, metalness: 0.05 });
+const ground = new THREE.Mesh(terrainGeo, terrainMat); ground.receiveShadow = true; scene.add(ground);
+
+// ---------- GPU WIND SHADER FOR VEGETATION ----------
+const customUniforms = { time: { value: 0 } };
+function injectWindShader(shader) {
+  shader.uniforms.time = customUniforms.time;
+  shader.vertexShader = `uniform float time;\n${shader.vertexShader}`.replace(
+    `#include <begin_vertex>`,
+    `vec3 transformed = vec3( position );
+    float windStrength = max(0.0, transformed.y) * 0.2;
+    float wind = sin(time * 2.0 + (instanceMatrix[3][0] + instanceMatrix[3][2]) * 0.1) * windStrength;
+    transformed.x += wind; transformed.z += wind * 0.5;`
+  );
+}
+
+// OPTIMIZATION: Dropped veg count for performance & disabled shadows on grass
+const VEG_COUNT = 150000;
+const bladeGeo = new THREE.ConeGeometry(0.15, 2.2, 3); bladeGeo.translate(0, 1.1, 0);
+const grassMat = new THREE.MeshPhysicalMaterial({ color: 0x1a4513, roughness: 0.7 }); grassMat.onBeforeCompile = injectWindShader;
+const grassMesh = new THREE.InstancedMesh(bladeGeo, grassMat, VEG_COUNT); 
+// grassMesh.receiveShadow = false; grassMesh.castShadow = false; // No shadows to fix lag
+
+const wheatGeo = new THREE.ConeGeometry(0.2, 4.0, 4); wheatGeo.translate(0, 2.0, 0);
+const wheatMat = new THREE.MeshPhysicalMaterial({ color: 0x8a6b22, roughness: 0.9 }); wheatMat.onBeforeCompile = injectWindShader;
+const wheatMesh = new THREE.InstancedMesh(wheatGeo, wheatMat, Math.floor(VEG_COUNT/2)); 
+
+const dummy = new THREE.Object3D(); let gIdx = 0, wIdx = 0;
+for(let i=0; i<VEG_COUNT * 1.5; i++){
+  const x = (Math.random() - 0.5) * SIZE * 0.8; const z = (Math.random() - 0.5) * SIZE * 0.8;
+  const y = getHeight(x, z); const b = fbm(x*2, z*2);
+  dummy.position.set(x, y, z); dummy.rotation.y = Math.random() * Math.PI;
+  if (b > 0.5 && wIdx < Math.floor(VEG_COUNT/2)) { dummy.scale.setScalar(0.8 + Math.random() * 0.5); dummy.updateMatrix(); wheatMesh.setMatrixAt(wIdx++, dummy.matrix); } 
+  else if (gIdx < VEG_COUNT) { dummy.scale.setScalar(0.5 + Math.random() * 0.8); dummy.updateMatrix(); grassMesh.setMatrixAt(gIdx++, dummy.matrix); }
+}
+scene.add(grassMesh); scene.add(wheatMesh);
+
+// OPTIMIZATION: Reduced tree count
+const TREE_COUNT = 800;
+const trunkGeo = new THREE.CylinderGeometry(0.6, 1.2, 8, 7); trunkGeo.translate(0, 4, 0);
+const leavesGeo = new THREE.IcosahedronGeometry(4.5, 2); leavesGeo.translate(0, 9, 0);
+const pPos = leavesGeo.attributes.position;
+for(let i=0; i<pPos.count; i++) { const n = noise(pPos.getX(i)*2, pPos.getY(i)*2); pPos.setX(i, pPos.getX(i) + n); pPos.setY(i, pPos.getY(i) + n); pPos.setZ(i, pPos.getZ(i) + n); }
+leavesGeo.computeVertexNormals();
+const trunkMat = new THREE.MeshPhysicalMaterial({ color: 0x2b1e15, roughness: 1.0 });
+const leavesMat = new THREE.MeshPhysicalMaterial({ color: 0x0c240d, roughness: 0.8 }); leavesMat.onBeforeCompile = injectWindShader;
+const trunks = new THREE.InstancedMesh(trunkGeo, trunkMat, TREE_COUNT); const leaves = new THREE.InstancedMesh(leavesGeo, leavesMat, TREE_COUNT);
+trunks.castShadow = true; trunks.receiveShadow = true; 
+
+let tIdx = 0;
+while(tIdx < TREE_COUNT) {
+  const x = (Math.random() - 0.5) * SIZE * 0.9; const z = (Math.random() - 0.5) * SIZE * 0.9;
+  if(Math.abs(x) < 50 && Math.abs(z) < 50) continue; 
+  const y = getHeight(x, z); const scale = 0.7 + Math.random() * 1.8;
+  dummy.position.set(x, y, z); dummy.rotation.y = Math.random() * Math.PI;
+  dummy.scale.set(scale, scale + Math.random(), scale); dummy.updateMatrix();
+  trunks.setMatrixAt(tIdx, dummy.matrix); leaves.setMatrixAt(tIdx, dummy.matrix); tIdx++;
+}
+scene.add(trunks); scene.add(leaves);
+
+// ---------- GIANT TURBINES ----------
+const turbines = [];
+const turbineMat = new THREE.MeshPhysicalMaterial({ color: 0xe0e0e0, roughness: 0.2, metalness: 0.6 });
+const redLightMat = new THREE.MeshBasicMaterial({ color: 0xff0000 }); 
+const T_SCALE = 5.0; 
+
+for(let i=0; i<40; i++) {
+  const tx = (Math.random() - 0.5) * SIZE * 0.9; const tz = (Math.random() - 0.5) * SIZE * 0.9;
+  if(Math.abs(tx) < 250 && Math.abs(tz) < 250) continue; 
+  const ty = getHeight(tx, tz); const tHeight = 70 * T_SCALE;
+
+  const tower = new THREE.Mesh(new THREE.CylinderGeometry(1.2 * T_SCALE, 2.5 * T_SCALE, tHeight, 16), turbineMat);
+  tower.position.set(tx, ty + (tHeight/2), tz); 
+  tower.castShadow = true; tower.receiveShadow = true; 
+  scene.add(tower);
+
+  const head = new THREE.Group();
+  head.position.set(tx, ty + tHeight, tz);
+  head.rotation.y = Math.random() * Math.PI;
+  scene.add(head);
+
+  const nacelle = new THREE.Mesh(new THREE.CapsuleGeometry(1.5 * T_SCALE, 4.5 * T_SCALE, 8, 16), turbineMat);
+  nacelle.rotation.x = Math.PI / 2;
+  head.add(nacelle);
+
+  const light = new THREE.Mesh(new THREE.SphereGeometry(1.5, 8, 8), redLightMat);
+  light.position.set(0, 1.5 * T_SCALE, -2 * T_SCALE); 
+  head.add(light);
+
+  const rotor = new THREE.Group(); 
+  rotor.position.set(0, 0, 3.75 * T_SCALE); 
+  head.add(rotor);
+
+  const spinner = new THREE.Mesh(new THREE.SphereGeometry(1.5 * T_SCALE, 16, 16), turbineMat);
+  spinner.scale.set(1, 1, 1.2); 
+  rotor.add(spinner);
+
+  for(let b=0; b<3; b++) {
+    const bladeGeo = new THREE.ConeGeometry(1.0 * T_SCALE, 32 * T_SCALE, 4); 
+    bladeGeo.translate(0, 16 * T_SCALE, 0); 
+    bladeGeo.scale(1, 1, 0.1);
+    const blade = new THREE.Mesh(bladeGeo, turbineMat); 
+    blade.castShadow = true;
+    
+    const pivot = new THREE.Group(); 
+    pivot.rotation.z = (b * Math.PI * 2) / 3; 
+    pivot.add(blade); 
+    rotor.add(pivot);
+  }
+  
+  turbines.push({ mesh: rotor, speed: 0.05 + Math.random() * 0.1, light: light });
+}
+
+// ---------- REALISTIC PROCEDURAL PLANES ----------
+function createRealisticPlane() {
+  const planeGrp = new THREE.Group();
+  const hullMat = new THREE.MeshPhysicalMaterial({ color: 0xdddddd, metalness: 0.6, roughness: 0.2, clearcoat: 0.8 });
+  const darkMat = new THREE.MeshPhysicalMaterial({ color: 0x111111, roughness: 0.9 });
+  
+  const fuselageGeo = new THREE.CapsuleGeometry(1.8, 16, 8, 16);
+  fuselageGeo.rotateX(Math.PI / 2);
+  const fuselage = new THREE.Mesh(fuselageGeo, hullMat);
+  planeGrp.add(fuselage);
+
+  const wingGeo = new THREE.BoxGeometry(28, 0.4, 5);
+  const wings = new THREE.Mesh(wingGeo, hullMat);
+  wings.position.set(0, -0.6, 1);
+  const wPos = wings.geometry.attributes.position;
+  for(let i=0; i<wPos.count; i++) {
+    if(Math.abs(wPos.getX(i)) > 4) {
+      wPos.setZ(i, wPos.getZ(i) + 4); 
+      wPos.setY(i, wPos.getY(i) + 0.4); 
+    }
+  }
+  wings.geometry.computeVertexNormals();
+  planeGrp.add(wings);
+
+  const vTailGeo = new THREE.BoxGeometry(0.4, 4.5, 3.5);
+  const vTail = new THREE.Mesh(vTailGeo, hullMat);
+  vTail.position.set(0, 2.5, 8);
+  const vtPos = vTail.geometry.attributes.position;
+  for(let i=0; i<vtPos.count; i++) {
+    if(vtPos.getY(i) > 0) vtPos.setZ(i, vtPos.getZ(i) + 2); 
+  }
+  vTail.geometry.computeVertexNormals();
+  planeGrp.add(vTail);
+
+  const hTailGeo = new THREE.BoxGeometry(9, 0.3, 2.5);
+  const hTail = new THREE.Mesh(hTailGeo, hullMat);
+  hTail.position.set(0, 0.5, 8.5);
+  const htPos = hTail.geometry.attributes.position;
+  for(let i=0; i<htPos.count; i++) {
+    if(Math.abs(htPos.getX(i)) > 1) htPos.setZ(i, htPos.getZ(i) + 1.5); 
+  }
+  hTail.geometry.computeVertexNormals();
+  planeGrp.add(hTail);
+
+  const engineGeo = new THREE.CylinderGeometry(0.7, 0.7, 2.5, 12);
+  engineGeo.rotateX(Math.PI / 2);
+  const engL = new THREE.Mesh(engineGeo, darkMat); engL.position.set(-5, -1.2, 1.5);
+  const engR = new THREE.Mesh(engineGeo, darkMat); engR.position.set(5, -1.2, 1.5);
+  planeGrp.add(engL); planeGrp.add(engR);
+
+  const lightL = new THREE.Mesh(new THREE.SphereGeometry(0.3, 4, 4), new THREE.MeshBasicMaterial({ color: 0xff0000 }));
+  lightL.position.set(-13.5, 0, 5); planeGrp.add(lightL); 
+  
+  const lightR = new THREE.Mesh(new THREE.SphereGeometry(0.3, 4, 4), new THREE.MeshBasicMaterial({ color: 0x00ff00 }));
+  lightR.position.set(13.5, 0, 5); planeGrp.add(lightR); 
+
+  const strobe = new THREE.Mesh(new THREE.SphereGeometry(0.4, 4, 4), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+  strobe.position.set(0, 5, 9); planeGrp.add(strobe); 
+
+  planeGrp.scale.set(3, 3, 3); 
+  return { group: planeGrp, strobe: strobe };
+}
+
+const planes = [];
+for(let i=0; i<5; i++) {
+  const pData = createRealisticPlane();
+  const dir = new THREE.Vector3(Math.random()-0.5, 0, Math.random()-0.5).normalize();
+  
+  pData.group.position.set((Math.random()-0.5)*4000, 800 + Math.random()*1200, (Math.random()-0.5)*4000);
+  
+  const target = pData.group.position.clone().add(dir);
+  pData.group.lookAt(target);
+  
+  scene.add(pData.group);
+  
+  planes.push({ 
+    group: pData.group, 
+    strobe: pData.strobe, 
+    dir: dir, 
+    speed: 150 + Math.random()*100,
+    offset: Math.random() * 10
+  });
+}
+
+// ---------- BIRDS WITH AI & SPATIAL AUDIO ----------
+const BIRD_COUNT = 40;
+const birds = [];
+const bodyGeo = new THREE.ConeGeometry(0.3, 1.5, 4); bodyGeo.rotateX(Math.PI/2);
+const wingGeo = new THREE.PlaneGeometry(1.5, 0.8); wingGeo.translate(0.75, 0, 0);
+const birdMat = new THREE.MeshPhysicalMaterial({ color: 0x050505, roughness: 0.9, side: THREE.DoubleSide });
+
+for(let i=0; i<BIRD_COUNT; i++) {
+  const birdGrp = new THREE.Group();
+  const body = new THREE.Mesh(bodyGeo, birdMat);
+  const wingL = new THREE.Mesh(wingGeo, birdMat); wingL.position.set(-0.1, 0.2, 0); wingL.rotation.y = Math.PI;
+  const wingR = new THREE.Mesh(wingGeo, birdMat); wingR.position.set(0.1, 0.2, 0);
+  birdGrp.add(body); birdGrp.add(wingL); birdGrp.add(wingR);
+  
+  const startX = (Math.random()-0.5)*1500; const startZ = (Math.random()-0.5)*1500;
+  birdGrp.position.set(startX, 150 + Math.random()*100, startZ);
+  scene.add(birdGrp);
+  
+  birds.push({
+    grp: birdGrp, wL: wingL, wR: wingR,
+    velocity: new THREE.Vector3(Math.random()-0.5, 0, Math.random()-0.5).normalize().multiplyScalar(20 + Math.random()*15),
+    targetVelocity: new THREE.Vector3(),
+    flapSpeed: 10 + Math.random()*5, flapOffset: Math.random()*10,
+    panner: createBirdPanner()
+  });
+}
+
+// ---------- SPOOKY DIRECTOR ----------
+const eyesGeo = new THREE.SphereGeometry(0.5, 8, 8);
+const eyesMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+const spookyEyes = new THREE.Group();
+const eyeL = new THREE.Mesh(eyesGeo, eyesMat); eyeL.position.set(-1.5, 0, 0);
+const eyeR = new THREE.Mesh(eyesGeo, eyesMat); eyeR.position.set(1.5, 0, 0);
+spookyEyes.add(eyeL); spookyEyes.add(eyeR);
+spookyEyes.visible = false;
+scene.add(spookyEyes);
+
+let spookyTimer = 0;
+let isNightGlob = false;
+
+function updateSpooks(dt, playerPos) {
+  if (!isNightGlob) { spookyEyes.visible = false; return; }
+  spookyTimer += dt;
+
+  if (!spookyEyes.visible && spookyTimer > 10 && Math.random() < 0.005) {
+    const angle = camera.rotation.y + Math.PI + (Math.random() - 0.5) * 1.5; 
+    const dist = 120 + Math.random() * 50;
+    spookyEyes.position.set(playerPos.x + Math.sin(angle)*dist, getHeight(playerPos.x, playerPos.z) + 3, playerPos.z + Math.cos(angle)*dist);
+    spookyEyes.lookAt(playerPos);
+    spookyEyes.visible = true;
+    spookyTimer = 0;
+  }
+
+  if (spookyEyes.visible) {
+    spookyEyes.lookAt(playerPos);
+    const distToPlayer = spookyEyes.position.distanceTo(playerPos);
+    if (distToPlayer < 50) {
+      spookyEyes.visible = false;
+      if(audioCtx.state === 'running') {
+         const osc = audioCtx.createOscillator(); osc.type = 'triangle'; osc.frequency.value = 40;
+         const g = audioCtx.createGain(); g.gain.setValueAtTime(0.5, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1);
+         osc.connect(g); g.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 1);
+      }
+    }
+  }
+}
 
 // ---------- CONTROLS & UI ----------
 const controls = new PointerLockControls(camera, document.body);
 const blocker = document.getElementById('blocker');
 
 blocker.addEventListener('click', (e) => {
-  // Prevent locking if clicking phone UI
-  if(phoneActive && e.clientY > innerHeight - 600 && e.clientX > innerWidth - 350) return;
-  
+  if(phoneActive && e.clientY > innerHeight - 700 && e.clientX > innerWidth - 360) return;
   controls.lock();
-  if (audioCtx.state === 'suspended') {
-    audioCtx.resume();
-    startWind(); 
-  }
+  if (audioCtx.state === 'suspended') { audioCtx.resume(); startAudio(); }
 });
-controls.addEventListener('lock', () => { blocker.style.display = 'none'; });
-controls.addEventListener('unlock', () => { if(!phoneActive) blocker.style.display = 'flex'; });
+controls.addEventListener('lock', () => { blocker.style.opacity = '0'; setTimeout(()=>blocker.style.display='none', 500); });
+controls.addEventListener('unlock', () => { if(!phoneActive) { blocker.style.display = 'flex'; setTimeout(()=>blocker.style.opacity='1', 10); }});
 scene.add(controls.getObject());
 
 let move = { f:0, b:0, l:0, r:0 };
 let phoneActive = false;
 
 addEventListener('keydown', e => {
+  if(document.activeElement === document.getElementById('chat-input')) {
+    if(e.code === 'Enter') sendChat();
+    return;
+  }
   if(e.code==='KeyW') move.f=1; if(e.code==='KeyS') move.b=1;
   if(e.code==='KeyA') move.l=1; if(e.code==='KeyD') move.r=1;
   if(e.code==='KeyP') {
-    phoneActive = !phoneActive;
-    document.getElementById('phone').classList.toggle('active', phoneActive);
-    if(phoneActive) {
-      document.exitPointerLock();
-    } else {
-      controls.lock();
-    }
+    phoneActive = !phoneActive; document.getElementById('phone').classList.toggle('active', phoneActive);
+    if(phoneActive) document.exitPointerLock(); else controls.lock();
   }
 });
 addEventListener('keyup', e => {
@@ -241,569 +725,515 @@ addEventListener('keyup', e => {
   if(e.code==='KeyA') move.l=0; if(e.code==='KeyD') move.r=0;
 });
 
-// ---------- LIGHTING ----------
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
-scene.add(ambientLight);
-
-const sunLight = new THREE.DirectionalLight(0xffeedd, 3.5);
-sunLight.castShadow = true;
-sunLight.shadow.mapSize.width = 4096; 
-sunLight.shadow.mapSize.height = 4096;
-sunLight.shadow.camera.near = 0.5;
-sunLight.shadow.camera.far = 1500;
-const d = 400;
-sunLight.shadow.camera.left = -d; sunLight.shadow.camera.right = d;
-sunLight.shadow.camera.top = d; sunLight.shadow.camera.bottom = -d;
-sunLight.shadow.bias = -0.0005;
-scene.add(sunLight);
-
-const moonLight = new THREE.DirectionalLight(0x88aaff, 0.2);
-scene.add(moonLight);
-
-const flashlight = new THREE.SpotLight(0xfffaea, 0, 600, Math.PI/4, 0.4, 1.2);
-flashlight.castShadow = true;
-flashlight.shadow.mapSize.width = 2048;
-flashlight.shadow.mapSize.height = 2048;
-flashlight.position.set(0.5, -0.5, 0.5); 
-flashlight.target.position.set(0, 0, -1);
-camera.add(flashlight);
-camera.add(flashlight.target);
-
-// ---------- PROCEDURAL TERRAIN ----------
-function hash(x, y) { return fract(Math.sin(x * 12.9898 + y * 78.233) * 43758.5453); }
-function fract(x) { return x - Math.floor(x); }
-function noise(x, y) {
-  const ix = Math.floor(x), iy = Math.floor(y);
-  const fx = fract(x), fy = fract(y);
-  const ux = fx * fx * (3.0 - 2.0 * fx);
-  const uy = fy * fy * (3.0 - 2.0 * fy);
-  return (hash(ix, iy) * (1 - ux) + hash(ix + 1, iy) * ux) * (1 - uy) + 
-         (hash(ix, iy + 1) * (1 - ux) + hash(ix + 1, iy + 1) * ux) * uy;
-}
-function getHeight(x, z) {
-  let y = noise(x * 0.015, z * 0.015) * 25; 
-  y += noise(x * 0.05, z * 0.05) * 8;
-  return y;
-}
-function getBiome(x, z) { return noise(x * 0.005, z * 0.005); }
-
-const SIZE = 2000; 
-const SEG = 500; 
-const terrainGeo = new THREE.PlaneGeometry(SIZE, SIZE, SEG, SEG);
-terrainGeo.rotateX(-Math.PI/2);
-
-for(let i=0; i<terrainGeo.attributes.position.count; i++) {
-  const x = terrainGeo.attributes.position.getX(i);
-  const z = terrainGeo.attributes.position.getZ(i);
-  terrainGeo.attributes.position.setY(i, getHeight(x, z));
-}
-terrainGeo.computeVertexNormals();
-
-const groundTex = createNoiseTexture(512, 512, 0x1f2e15, 0x2e421e, 0.5);
-const terrainMat = new THREE.MeshStandardMaterial({ map: groundTex, roughness: 0.95 });
-const ground = new THREE.Mesh(terrainGeo, terrainMat);
-ground.receiveShadow = true;
-scene.add(ground);
-
-// ---------- VEGETATION & TREES ----------
-const VEG_COUNT = 80000;
-const bladeGeo = new THREE.PlaneGeometry(0.3, 1.8, 1, 2); 
-bladeGeo.translate(0, 0.9, 0);
-
-const grassMat = new THREE.MeshStandardMaterial({ color: 0x245e1d, side: THREE.DoubleSide, roughness: 0.8 });
-const grassMesh = new THREE.InstancedMesh(bladeGeo, grassMat, VEG_COUNT);
-grassMesh.receiveShadow = true;
-
-const wheatGeo = new THREE.PlaneGeometry(0.4, 3.5, 1, 2);
-wheatGeo.translate(0, 1.75, 0);
-const wheatMat = new THREE.MeshStandardMaterial({ color: 0xd9a036, side: THREE.DoubleSide, roughness: 0.6 });
-const wheatMesh = new THREE.InstancedMesh(wheatGeo, wheatMat, VEG_COUNT);
-wheatMesh.receiveShadow = true;
-
-const dummy = new THREE.Object3D();
-let grassIdx = 0, wheatIdx = 0;
-
-for(let i=0; i<VEG_COUNT * 1.5; i++){
-  const x = (Math.random() - 0.5) * SIZE;
-  const z = (Math.random() - 0.5) * SIZE;
-  const y = getHeight(x, z);
-  const biomeVal = getBiome(x, z);
-
-  dummy.position.set(x, y, z);
-  dummy.rotation.y = Math.random() * Math.PI;
-
-  if (biomeVal < 0.45 && wheatIdx < VEG_COUNT) {
-    dummy.scale.setScalar(0.7 + Math.random() * 0.6);
-    dummy.updateMatrix();
-    wheatMesh.setMatrixAt(wheatIdx++, dummy.matrix);
-  } else if (grassIdx < VEG_COUNT) {
-    dummy.scale.setScalar(0.5 + Math.random() * 0.8);
-    dummy.updateMatrix();
-    grassMesh.setMatrixAt(grassIdx++, dummy.matrix);
-  }
-}
-scene.add(grassMesh);
-scene.add(wheatMesh);
-
-const TREE_COUNT = 2000;
-const trunkGeo = new THREE.CylinderGeometry(0.5, 0.8, 6, 12); 
-trunkGeo.translate(0, 3, 0);
-const leavesGeo = new THREE.ConeGeometry(3.5, 10, 16); 
-leavesGeo.translate(0, 8, 0);
-
-const barkTex = createNoiseTexture(256, 256, 0x3d2817, 0x221308, 1.0);
-const trunkMat = new THREE.MeshStandardMaterial({ map: barkTex, roughness: 1.0 });
-const leavesMat = new THREE.MeshStandardMaterial({ color: 0x122e11, roughness: 0.9 });
-
-const trunks = new THREE.InstancedMesh(trunkGeo, trunkMat, TREE_COUNT);
-const leaves = new THREE.InstancedMesh(leavesGeo, leavesMat, TREE_COUNT);
-trunks.castShadow = true; trunks.receiveShadow = true;
-leaves.castShadow = true; leaves.receiveShadow = true;
-
-let treeIndex = 0;
-while(treeIndex < TREE_COUNT) {
-  const x = (Math.random() - 0.5) * SIZE;
-  const z = (Math.random() - 0.5) * SIZE;
-  if(Math.abs(x) < 40 && Math.abs(z) < 40) continue; 
-
-  const y = getHeight(x, z);
-  const scale = 0.8 + Math.random() * 1.5;
-  dummy.position.set(x, y, z);
-  dummy.rotation.y = Math.random() * Math.PI;
-  dummy.scale.set(scale, scale + Math.random()*0.5, scale);
-  dummy.updateMatrix();
-  
-  trunks.setMatrixAt(treeIndex, dummy.matrix);
-  leaves.setMatrixAt(treeIndex, dummy.matrix);
-  treeIndex++;
-}
-scene.add(trunks);
-scene.add(leaves);
-
-// ---------- GIANT WIND TURBINES ----------
-const turbines = [];
-const turbineMat = new THREE.MeshStandardMaterial({ color: 0xe0e0e0, roughness: 0.3, metalness: 0.4 });
-const redLightMat = new THREE.MeshBasicMaterial({ color: 0xff0000 }); 
-const TURBINE_SCALE = 4.0; 
-
-for(let i=0; i<30; i++) {
-  const tx = (Math.random() - 0.5) * SIZE * 0.9;
-  const tz = (Math.random() - 0.5) * SIZE * 0.9;
-  if(Math.abs(tx) < 200 && Math.abs(tz) < 200) continue; 
-  const ty = getHeight(tx, tz);
-  const tHeight = 60 * TURBINE_SCALE;
-
-  const tower = new THREE.Mesh(new THREE.CylinderGeometry(1.5 * TURBINE_SCALE, 3.0 * TURBINE_SCALE, tHeight, 32), turbineMat);
-  tower.position.set(tx, ty + (tHeight/2), tz);
-  tower.castShadow = true;
-  scene.add(tower);
-
-  const warningLight = new THREE.Mesh(new THREE.SphereGeometry(3, 16, 16), redLightMat);
-  warningLight.position.set(tx, ty + tHeight + 2, tz);
-  scene.add(warningLight);
-
-  const rotor = new THREE.Group();
-  rotor.position.set(tx, ty + tHeight, tz + (2 * TURBINE_SCALE));
-  
-  const hub = new THREE.Mesh(new THREE.CylinderGeometry(2 * TURBINE_SCALE, 2 * TURBINE_SCALE, 5 * TURBINE_SCALE, 24), turbineMat);
-  hub.rotation.x = Math.PI / 2;
-  rotor.add(hub);
-
-  for(let b=0; b<3; b++) {
-    const bladeGeo = new THREE.BoxGeometry(1.5 * TURBINE_SCALE, 28 * TURBINE_SCALE, 0.5 * TURBINE_SCALE);
-    bladeGeo.translate(0, 14 * TURBINE_SCALE, 0); 
-    const blade = new THREE.Mesh(bladeGeo, turbineMat);
-    blade.castShadow = true;
-    const pivot = new THREE.Group();
-    pivot.rotation.z = (b * Math.PI * 2) / 3;
-    pivot.add(blade);
-    rotor.add(pivot);
-  }
-
-  rotor.rotation.y = Math.random() * Math.PI;
-  scene.add(rotor);
-  
-  turbines.push({ 
-    mesh: rotor, 
-    speed: 0.1 + Math.random() * 0.15,
-    light: warningLight,
-    offset: Math.random() * 10
+window.takePicture = function() {
+  const flash = document.getElementById('flash');
+  flash.style.opacity = '1';
+  setTimeout(() => flash.style.opacity = '0', 100);
+  requestAnimationFrame(() => {
+    renderer.render(scene, camera);
+    const dataURL = renderer.domElement.toDataURL('image/png');
+    const link = document.createElement('a');
+    link.download = `Windfarm_Snapshot_${Math.floor(Date.now()/1000)}.png`;
+    link.href = dataURL;
+    link.click();
   });
 }
 
-// ---------- DISTANT PLANES ----------
-const planes = [];
-const planeBodyMat = new THREE.MeshBasicMaterial({ color: 0x050505 });
-const strobeMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+// ---------- DYNAMIC WEATHER SYSTEM (RAIN) ----------
+let weatherMode = 'clear';
+const rainCount = 12000;
+const rainGeo = new THREE.BufferGeometry();
+const rainPositions = new Float32Array(rainCount * 3);
+for(let i=0; i<rainCount; i++) {
+  rainPositions[i*3] = (Math.random()-0.5)*350;
+  rainPositions[i*3+1] = Math.random()*200;
+  rainPositions[i*3+2] = (Math.random()-0.5)*350;
+}
+rainGeo.setAttribute('position', new THREE.BufferAttribute(rainPositions, 3));
+const rainMat = new THREE.PointsMaterial({ color: 0x6688aa, size: 1.2, transparent: true, opacity: 0, depthWrite: false });
+const rainParticles = new THREE.Points(rainGeo, rainMat);
+scene.add(rainParticles);
 
-for(let i=0; i<8; i++) {
-  const pGroup = new THREE.Group();
-  pGroup.position.set((Math.random()-0.5)*4000, 1000 + Math.random()*1000, (Math.random()-0.5)*4000);
-  
-  const body = new THREE.Mesh(new THREE.BoxGeometry(10, 2, 25), planeBodyMat);
-  const wLight = new THREE.Mesh(new THREE.BoxGeometry(15, 3, 2), strobeMat); 
-  const rLight = new THREE.Mesh(new THREE.SphereGeometry(6, 8, 8), redLightMat); 
-  rLight.position.y = -3;
-  
-  pGroup.add(body); pGroup.add(wLight); pGroup.add(rLight);
-  scene.add(pGroup);
-  
-  planes.push({ 
-    group: pGroup, 
-    whiteLight: wLight, 
-    redLight: rLight, 
-    dir: new THREE.Vector3(Math.random()-0.5, 0, Math.random()-0.5).normalize(), 
-    speed: 80 + Math.random()*100, 
-    offset: Math.random()*100 
-  });
+window.toggleWeather = function() {
+  const btn = document.getElementById('weatherToggle');
+  const desc = document.getElementById('weatherDesc');
+  if (weatherMode === 'clear') {
+    weatherMode = 'rain';
+    btn.classList.add('active'); btn.innerText = "RAIN";
+    desc.innerText = "Simulating dense downpour particles and high atmospheric humidity.";
+  } else {
+    weatherMode = 'clear';
+    btn.classList.remove('active'); btn.innerText = "CLEAR";
+    desc.innerText = "Standard clearing skies. Standard rendering setup.";
+  }
 }
 
-// ---------- P2P MULTIPLAYER ENGINE (WEBRTC) ----------
-let peer = null;
-let isHost = false;
-let connections = []; // For Host
-let hostConnection = null; // For Client
-let myPeerId = null;
-const networkPlayers = {}; // Dictionary of { id: [x,y,z,rot] }
-const playerMeshes = {}; // Dictionary of rendering objects
+// ---------- PLAYER BODY VISIBILITY ----------
+const bodyGroup = new THREE.Group();
+const suitMat = new THREE.MeshPhysicalMaterial({ color: 0x141414, roughness: 0.6, metalness: 0.2 });
+const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 1.4, 12), suitMat);
+torso.position.set(0, -0.9, -0.1); torso.castShadow = true; torso.receiveShadow = true;
+bodyGroup.add(torso);
 
-// Multiplayer Avatar Geometry
-const avatarMat = new THREE.MeshStandardMaterial({ color: 0x77aaff, roughness: 0.2, emissive: 0x112244 });
-const avatarGeo = new THREE.CapsuleGeometry(0.5, 1.4, 4, 16);
-const visorGeo = new THREE.BoxGeometry(0.8, 0.3, 0.5);
-const visorMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+const legL = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 1.1, 8), suitMat);
+legL.position.set(-0.16, -2.1, -0.1); legL.castShadow = true;
+bodyGroup.add(legL);
+const legR = legL.clone(); legR.position.x = 0.16;
+bodyGroup.add(legR);
+
+controls.getObject().add(bodyGroup);
+
+// ---------- ADVANCED MODULAR BUILDING SYSTEM WITH 3D GRID & NEW ELEMENTS ----------
+let currentBuildType = 'none';
+let previewStructure = null;
+const allBuiltObjects = [];
+const buildRaycaster = new THREE.Raycaster();
+const screenCenter = new THREE.Vector2(0, 0);
+const GRID_SIZE = 4;
+
+const structureGenerators = {
+  floor: () => { 
+    const geo = new THREE.BoxGeometry(GRID_SIZE, 0.2, GRID_SIZE); geo.translate(0, 0.1, 0); 
+    return new THREE.Mesh(geo, new THREE.MeshPhysicalMaterial({ color: 0x5a5a5a, roughness: 0.9 })); 
+  },
+  wall: () => { 
+    const geo = new THREE.BoxGeometry(GRID_SIZE, GRID_SIZE, 0.2); geo.translate(0, GRID_SIZE/2, 0);
+    return new THREE.Mesh(geo, new THREE.MeshPhysicalMaterial({ color: 0x827f7a, roughness: 0.8 })); 
+  },
+  window: () => {
+    const winGrp = new THREE.Group();
+    const frameMat = new THREE.MeshPhysicalMaterial({ color: 0x444444 });
+    const glassMat = new THREE.MeshPhysicalMaterial({ color: 0x88ccff, transparent: true, opacity: 0.4, roughness: 0.1, metalness: 0.8 });
+    
+    const wL = new THREE.Mesh(new THREE.BoxGeometry(0.4, GRID_SIZE, 0.2), frameMat); wL.position.set(-1.8, GRID_SIZE/2, 0);
+    const wR = new THREE.Mesh(new THREE.BoxGeometry(0.4, GRID_SIZE, 0.2), frameMat); wR.position.set(1.8, GRID_SIZE/2, 0);
+    const wT = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.4, 0.2), frameMat); wT.position.set(0, GRID_SIZE - 0.2, 0);
+    const wB = new THREE.Mesh(new THREE.BoxGeometry(3.2, 1.0, 0.2), frameMat); wB.position.set(0, 0.5, 0);
+    const glass = new THREE.Mesh(new THREE.BoxGeometry(3.2, 2.6, 0.1), glassMat); glass.position.set(0, 2.3, 0);
+    
+    winGrp.add(wL, wR, wT, wB, glass);
+    return winGrp;
+  },
+  stairs: () => {
+    const stairGrp = new THREE.Group();
+    const sMat = new THREE.MeshPhysicalMaterial({ color: 0x6a6a6a, roughness: 0.9 });
+    for(let i=0; i<4; i++) {
+        const step = new THREE.Mesh(new THREE.BoxGeometry(GRID_SIZE, 1, 1), sMat);
+        step.position.set(0, 0.5 + i, 1.5 - i);
+        stairGrp.add(step);
+    }
+    return stairGrp;
+  },
+  chair: () => {
+    const group = new THREE.Group();
+    const mMat = new THREE.MeshPhysicalMaterial({ color: 0x3d271d, roughness: 0.8 });
+    const seat = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.12, 1.2), mMat); seat.position.y = 0.7; group.add(seat);
+    const back = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.1, 0.12), mMat); back.position.set(0, 1.25, -0.54); group.add(back);
+    for(let x of [-0.5, 0.5]) { for(let z of [-0.5, 0.5]) { const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.7), mMat); leg.position.set(x, 0.35, z); group.add(leg); } }
+    return group;
+  },
+  table: () => {
+    const group = new THREE.Group();
+    const tMat = new THREE.MeshPhysicalMaterial({ color: 0x4a3227, roughness: 0.7 });
+    const top = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.12, 1.8), tMat); top.position.y = 1.1; group.add(top);
+    for(let x of [-1.1, 1.1]) { for(let z of [-0.7, 0.7]) { const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 1.1), tMat); leg.position.set(x, 0.55, z); group.add(leg); } }
+    return group;
+  },
+  lamp: () => {
+    const group = new THREE.Group();
+    const metal = new THREE.MeshPhysicalMaterial({ color: 0x1a1a1a, metalness: 0.8, roughness: 0.2 });
+    const post = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.14, 5), metal); post.position.y = 2.5; group.add(post);
+    const topCap = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.3, 0.3, 8), metal); topCap.position.y = 5.15; group.add(topCap);
+    const glass = new THREE.Mesh(new THREE.SphereGeometry(0.35, 12, 12), new THREE.MeshBasicMaterial({ color: 0xffeebb })); glass.position.y = 4.8; group.add(glass);
+    
+    const pLight = new THREE.PointLight(0xffecc2, 40, 45, 1.4); pLight.position.set(0, 4.8, 0); pLight.castShadow = true; group.add(pLight);
+    return group;
+  },
+  light: () => {
+    const mesh = new THREE.Mesh(new THREE.SphereGeometry(0.25, 8, 8), new THREE.MeshBasicMaterial({ color: 0x00ffff }));
+    const pLight = new THREE.PointLight(0x00ffff, 35, 30, 1.2); pLight.position.set(0, 0, 0); mesh.add(pLight);
+    return mesh;
+  }
+};
+
+window.selectBuild = function(type) {
+  currentBuildType = type;
+  if(previewStructure) { scene.remove(previewStructure); previewStructure = null; }
+  
+  if(type === 'none') { 
+    phoneActive = false; document.getElementById('phone').classList.remove('active'); 
+    document.getElementById('buildStatus').style.display = 'none';
+    controls.lock(); return; 
+  }
+  
+  previewStructure = structureGenerators[type]();
+  
+  // Make preview transparent green
+  previewStructure.traverse(child => { 
+      if(child.isMesh) { 
+          child.material = new THREE.MeshBasicMaterial({ color: 0x00ff66, wireframe: true, transparent: true, opacity: 0.5 }); 
+      }
+      if(child.isLight) { child.intensity = 0; }
+  });
+  
+  scene.add(previewStructure);
+  document.getElementById('buildStatus').style.display = 'inline';
+  phoneActive = false; document.getElementById('phone').classList.remove('active'); controls.lock();
+};
+
+window.addEventListener('click', () => {
+  if(controls.isLocked && currentBuildType !== 'none' && previewStructure) {
+    let spawnedObj = structureGenerators[currentBuildType]();
+    
+    spawnedObj.position.copy(previewStructure.position);
+    spawnedObj.rotation.copy(previewStructure.rotation);
+    spawnedObj.traverse(child => { if(child.isMesh) { child.castShadow = true; child.receiveShadow = true; } });
+    
+    scene.add(spawnedObj);
+    allBuiltObjects.push(spawnedObj);
+  }
+});
+
+// ---------- MULTIPLAYER (WEBRTC) & CHAT APP ----------
+let peer = null, isHost = false, connections = [], hostConnection = null, myPeerId = null;
+const networkPlayers = {}, playerMeshes = {}; 
+const avatarGeo = new THREE.CapsuleGeometry(0.6, 1.6, 4, 16);
+const avatarMat = new THREE.MeshPhysicalMaterial({ color: 0x444444, metalness: 0.8, roughness: 0.2 });
+
+function appendChat(sender, msg, isSelf=false) {
+  const log = document.getElementById('chat-log');
+  const div = document.createElement('div');
+  div.className = `chat-msg ${isSelf ? 'self' : ''}`;
+  div.innerText = isSelf ? msg : `${sender.substring(0,4)}: ${msg}`;
+  log.appendChild(div);
+  log.scrollTop = log.scrollHeight;
+}
+
+window.sendChat = function() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if(!text || !myPeerId) return;
+  
+  const payload = { type: 'chat', text: text, sender: myPeerId };
+  if(isHost) { connections.forEach(c => c.send(payload)); } 
+  else if(hostConnection) { hostConnection.send(payload); }
+  
+  appendChat(myPeerId, text, true);
+  input.value = '';
+}
+
+function handleData(data, senderId) {
+  if(data.type === 'chat') {
+    appendChat(senderId, data.text);
+    if(isHost) { connections.forEach(c => { if(c.peer !== senderId) c.send(data); }); }
+  } else {
+    if(isHost) networkPlayers[senderId] = data;
+    else updateNetworkMeshes(data, myPeerId);
+  }
+}
 
 function createPlayerMesh() {
   const group = new THREE.Group();
-  const body = new THREE.Mesh(avatarGeo, avatarMat);
-  body.position.y = 1;
-  body.castShadow = true;
-  
-  const visor = new THREE.Mesh(visorGeo, visorMat);
-  visor.position.set(0, 1.4, -0.4); // Negative Z is forward
-  
-  // Attach a network flashlight to the avatar
-  const netFlashlight = new THREE.SpotLight(0xfffaea, 0, 600, Math.PI/4, 0.4, 1.2);
-  netFlashlight.position.set(0, 1.4, -0.5);
-  netFlashlight.target.position.set(0, 1.4, -2);
-  
-  group.add(body);
-  group.add(visor);
-  group.add(netFlashlight);
-  group.add(netFlashlight.target);
-  
-  group.userData.flashlight = netFlashlight;
-  scene.add(group);
-  return group;
+  const body = new THREE.Mesh(avatarGeo, avatarMat); body.position.y = 1.1; body.castShadow = true;
+  const visor = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.4, 0.6), new THREE.MeshPhysicalMaterial({ color: 0x000, roughness: 0.1, clearcoat: 1 }));
+  visor.position.set(0, 1.5, -0.4);
+  const netFlashlight = new THREE.SpotLight(0xfffaea, 0, 800, Math.PI/5, 0.6, 1.5);
+  netFlashlight.position.set(0, 1.5, -0.5); netFlashlight.target.position.set(0, 1.5, -2);
+  group.add(body); group.add(visor); group.add(netFlashlight); group.add(netFlashlight.target);
+  group.userData.flashlight = netFlashlight; scene.add(group); return group;
 }
 
 function updateNetworkMeshes(dataMap, myId) {
   for (let id in dataMap) {
-    if (id === myId) continue; // Don't render yourself
-    if (!playerMeshes[id]) {
-      playerMeshes[id] = createPlayerMesh();
-    }
+    if (id === myId) continue; 
+    if (!playerMeshes[id]) playerMeshes[id] = createPlayerMesh();
     const p = dataMap[id];
-    // Interpolate smoothly or set direct
-    playerMeshes[id].position.set(p[0], p[1], p[2]);
+    playerMeshes[id].position.lerp(new THREE.Vector3(p[0], p[1], p[2]), 0.3);
     playerMeshes[id].rotation.y = p[3];
   }
-  // Remove disconnected players
   for (let id in playerMeshes) {
-    if (!dataMap[id] && id !== myId) {
-      scene.remove(playerMeshes[id]);
-      delete playerMeshes[id];
-    }
+    if (!dataMap[id] && id !== myId) { scene.remove(playerMeshes[id]); delete playerMeshes[id]; }
   }
 }
 
-// Phone UI Listeners for Multiplayer
 const mpStatus = document.getElementById('mp-status');
-
 document.getElementById('btnHost').onclick = () => {
   if (peer) return;
-  mpStatus.innerHTML = "Starting Server...";
+  mpStatus.innerHTML = "BOOTING..."; mpStatus.style.color = "#ffcc00";
   peer = new Peer();
-  peer.on('open', (id) => {
-    myPeerId = id;
-    isHost = true;
-    mpStatus.innerHTML = `Hosting ID: <b style="color:#0f0">${id}</b>`;
-  });
+  peer.on('open', (id) => { myPeerId = id; isHost = true; mpStatus.innerHTML = `HOST: ${id}`; mpStatus.style.color="#0f0"; });
   peer.on('connection', (conn) => {
     connections.push(conn);
-    conn.on('data', (data) => {
-      // Host receives client data: [x,y,z,rot]
-      networkPlayers[conn.peer] = data;
-    });
-    conn.on('close', () => {
-      connections = connections.filter(c => c !== conn);
-      delete networkPlayers[conn.peer];
-    });
+    conn.on('data', (data) => handleData(data, conn.peer));
+    conn.on('close', () => { connections = connections.filter(c => c !== conn); delete networkPlayers[conn.peer]; });
   });
 };
-
 document.getElementById('btnJoin').onclick = () => {
   if (peer) return;
-  const hostId = prompt("Enter the Host's ID:");
-  if (!hostId) return;
-  
-  mpStatus.innerHTML = "Connecting...";
+  const hostId = prompt("ENTER HOST ID:"); if (!hostId) return;
+  mpStatus.innerHTML = "LINKING..."; mpStatus.style.color = "#ffcc00";
   peer = new Peer();
   peer.on('open', (id) => {
-    myPeerId = id;
-    isHost = false;
-    hostConnection = peer.connect(hostId);
-    
-    hostConnection.on('open', () => {
-      mpStatus.innerHTML = `Connected to: <b style="color:#0f0">${hostId}</b>`;
-    });
-    
-    hostConnection.on('data', (data) => {
-      // Client receives full network state from Host
-      updateNetworkMeshes(data, myPeerId);
-    });
-    
-    hostConnection.on('close', () => {
-      mpStatus.innerHTML = "Host Disconnected";
-      for (let pid in playerMeshes) {
-        scene.remove(playerMeshes[pid]);
-        delete playerMeshes[pid];
-      }
-    });
+    myPeerId = id; isHost = false; hostConnection = peer.connect(hostId);
+    hostConnection.on('open', () => { mpStatus.innerHTML = `LINKED`; mpStatus.style.color="#0f0"; });
+    hostConnection.on('data', (data) => handleData(data, hostConnection.peer));
+    hostConnection.on('close', () => { mpStatus.innerHTML = "LINK SEVERED"; mpStatus.style.color="#f00"; });
   });
 };
 
-// ---------- CLEAN VHS POST-PROCESSING ----------
+// ---------- POST-PROCESSING ----------
 const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
+// OPTIMIZATION: Slightly reduced bloom settings
+composer.addPass(new UnrealBloomPass(new THREE.Vector2(innerWidth/2, innerHeight/2), 0.7, 0.4, 0.85));
 
-const CleanVHSShader = {
+const VHSShader = {
   uniforms: { tDiffuse: { value: null }, time: { value: 0 } },
   vertexShader: `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
   fragmentShader: `
-    uniform sampler2D tDiffuse; 
-    uniform float time; 
-    varying vec2 vUv;
-    
+    uniform sampler2D tDiffuse; uniform float time; varying vec2 vUv;
     float rand(vec2 n) { return fract(sin(dot(n, vec2(12.9898, 4.1414))) * 43758.5453); }
-    
     void main() {
       vec2 uv = vUv;
-      vec2 crt = uv * 2.0 - 1.0;
-      vec2 offset = crt.yx / 5.0;
-      crt = crt + crt * offset * offset;
-      uv = crt * 0.5 + 0.5;
-
-      if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) {
-        gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
-        return;
-      }
-
-      float tracking = max(0.0, sin(time * 2.0) * 0.1 - uv.y) * 0.02 * sin(uv.y * 100.0 + time * 10.0);
-      uv.x += tracking;
-      
       vec4 col = texture2D(tDiffuse, uv);
       
-      col.rgb *= 2.1; 
-      col.g *= 1.05; 
-
-      float noise = (rand(uv * time) - 0.5) * 0.12;
-      col.rgb += noise;
+      col.rgb *= 1.1; 
+      col.rgb += (rand(uv * time) - 0.5) * 0.05;
       
       float vig = uv.x * uv.y * (1.0 - uv.x) * (1.0 - uv.y);
-      vig = pow(16.0 * vig, 0.25);
-      col.rgb *= vig;
-
+      vig = pow(16.0 * vig, 0.25); col.rgb *= vig;
+      
       gl_FragColor = col;
     }
   `
 };
-const vhsPass = new ShaderPass(CleanVHSShader);
+const vhsPass = new ShaderPass(VHSShader);
 composer.addPass(vhsPass);
 
-// ---------- 20 MIN DAY/NIGHT CYCLE + DYNAMIC PHONE CLOCK ----------
-let gameTime = Math.PI / 1000000; // Start day
-const daySpeed = 0.00523; 
-const timeDisplay = document.getElementById('timeDisplay');
+// ---------- DAY/NIGHT CYCLE ----------
+let gameTime = Math.PI / 1000000; const daySpeed = 0.003; 
 const phoneTimeDisplay = document.getElementById('phoneTime');
-const phoneDateDisplay = document.getElementById('phoneDate');
-
-const sunMesh = new THREE.Mesh(new THREE.SphereGeometry(30, 32, 32), new THREE.MeshBasicMaterial({ color: 0xffffee }));
-const moonMesh = new THREE.Mesh(new THREE.SphereGeometry(20, 32, 32), new THREE.MeshBasicMaterial({ color: 0xaaccff }));
-scene.add(sunMesh); scene.add(moonMesh);
 
 function updateEnvironment(dt) {
   gameTime += dt * daySpeed;
-  const radius = 800; 
+  const radius = 2000; 
   
   sunLight.position.set(Math.cos(gameTime) * radius, Math.sin(gameTime) * radius, Math.cos(gameTime) * radius * 0.5);
   sunMesh.position.copy(sunLight.position);
-  
-  moonLight.position.set(Math.cos(gameTime + Math.PI) * radius, Math.sin(gameTime + Math.PI) * radius, Math.cos(gameTime + Math.PI) * radius * 0.5);
-  moonMesh.position.copy(moonLight.position);
+  moonMesh.position.set(Math.cos(gameTime + Math.PI) * radius, Math.sin(gameTime + Math.PI) * radius, Math.cos(gameTime + Math.PI) * radius * 0.5);
 
-  sunLight.target.position.set(camera.position.x, 0, camera.position.z);
-  sunLight.target.updateMatrixWorld();
+  sunLight.target.position.set(camera.position.x, 0, camera.position.z); sunLight.target.updateMatrixWorld();
 
-  const sunHeight = Math.max(0, Math.min(1, sunLight.position.y / 200)); 
-  const isNight = sunHeight < 0.1;
+  const sunHeight = Math.max(0, Math.min(1, sunLight.position.y / 400)); 
+  isNightGlob = sunHeight < 0.1;
 
-  const dayColor = new THREE.Color(0x6096BA); 
-  const nightColor = new THREE.Color(0x02040A); 
-  const dawnColor = new THREE.Color(0xE07A5F); 
-
+  const dayColor = new THREE.Color(0x4a7a9c); const nightColor = new THREE.Color(0x04060f); const dawnColor = new THREE.Color(0xd15b38); 
   let currentSkyColor = new THREE.Color();
-  if (sunHeight > 0.2) {
-    currentSkyColor.lerpColors(dawnColor, dayColor, (sunHeight - 0.2) / 0.8);
-  } else {
-    currentSkyColor.lerpColors(nightColor, dawnColor, sunHeight / 0.2);
-  }
-  scene.background = currentSkyColor;
+  if (sunHeight > 0.2) currentSkyColor.lerpColors(dawnColor, dayColor, (sunHeight - 0.2) / 0.8);
+  else currentSkyColor.lerpColors(nightColor, dawnColor, sunHeight / 0.2);
   
-  sunLight.intensity = Math.max(0, sunHeight * 3.5);
-  ambientLight.intensity = 0.02 + (sunHeight * 0.15);
+  let topColor = currentSkyColor.clone().multiplyScalar(0.4);
+  if (isNightGlob) topColor.setHex(0x010205);
+  skyMat.uniforms.topColor.value.copy(topColor);
+  skyMat.uniforms.bottomColor.value.copy(currentSkyColor);
 
-  if(isNight) {
-    flashlight.intensity = 20.0; 
-    timeDisplay.innerHTML = "Night<br>[Flashlight ON]";
-    timeDisplay.style.color = "#aaaaff";
-  } else {
-    flashlight.intensity = 0;
-    timeDisplay.innerHTML = "Day";
-    timeDisplay.style.color = "#ffffaa";
-  }
+  sunLight.intensity = Math.max(0, sunHeight * 4.0); ambientLight.intensity = 0.05 + (sunHeight * 0.25);
 
-  // Sync other players' flashlights
-  for (let id in playerMeshes) {
-    if (playerMeshes[id].userData.flashlight) {
-      playerMeshes[id].userData.flashlight.intensity = isNight ? 20.0 : 0;
-    }
-  }
+  starMat.opacity = isNightGlob ? (1.0 - sunHeight * 10.0) : 0;
 
-  // Phone Clock
-  let normalizedTime = (gameTime % (Math.PI * 2));
-  if (normalizedTime < 0) normalizedTime += Math.PI * 2;
-  
-  let hoursDecimal = (normalizedTime / (Math.PI * 2)) * 24 + 6;
-  if (hoursDecimal >= 24) hoursDecimal -= 24;
-  
-  let h = Math.floor(hoursDecimal);
-  let m = Math.floor((hoursDecimal - h) * 60);
-  let ampm = h >= 12 ? 'PM' : 'AM';
-  
-  let displayH = h % 12;
-  if (displayH === 0) displayH = 12;
-  let displayM = m < 10 ? '0' + m : m;
-  
-  phoneTimeDisplay.innerText = `${displayH}:${displayM}`;
-  phoneDateDisplay.innerText = `Game Time (${ampm})`;
+  if(isNightGlob) { flashlight.intensity = 30.0; } else { flashlight.intensity = 0; }
+  for (let id in playerMeshes) { if (playerMeshes[id].userData.flashlight) playerMeshes[id].userData.flashlight.intensity = isNightGlob ? 30.0 : 0; }
+
+  let hDecimal = ((gameTime % (Math.PI * 2)) / (Math.PI * 2)) * 24 + 6;
+  if (hDecimal >= 24) hDecimal -= 24;
+  let h = Math.floor(hDecimal), m = Math.floor((hDecimal - h) * 60);
+  let dH = h % 12; if (dH === 0) dH = 12;
+  phoneTimeDisplay.innerText = `${dH}:${m < 10 ? '0'+m : m}`;
 }
 
 // ---------- MAIN LOOP ----------
 let prevTime = performance.now();
-let lastNetworkTick = 0;
-const velocity = new THREE.Vector3();
-const direction = new THREE.Vector3();
-let stepTimer = 0;
+const velocity = new THREE.Vector3(), direction = new THREE.Vector3();
+let stepTimer = 0, lastNetworkTick = 0, headBob = 0;
+
+function checkCollisions(playerPos) {
+  const playerRadius = 1.5; // Promień kolizji gracza
+  allBuiltObjects.forEach(obj => {
+    // Proste sprawdzanie kolizji sferycznej (możesz rozbudować o BoundingBox dla większej precyzji)
+    const dist = playerPos.distanceTo(obj.position);
+    if (dist < playerRadius + 2.0) { // Jeśli gracz jest zbyt blisko obiektu
+      // Odepchnij gracza w przeciwnym kierunku
+      const pushDir = new THREE.Vector3().subVectors(playerPos, obj.position).normalize();
+      playerPos.add(pushDir.multiplyScalar(0.5));
+      playerPos.y = getHeight(playerPos.x, playerPos.z) + 3.5; // Utrzymaj na wysokości terenu
+    }
+  });
+}
 
 function animate(now) {
   requestAnimationFrame(animate);
-  const dt = (now - prevTime) / 1000;
-  prevTime = now;
+  const dt = (now - prevTime) / 1000; prevTime = now;
+
+  const pos = controls.getObject().position;
+  const isMoving = Math.abs(velocity.x) > 0.5 || Math.abs(velocity.z) > 0.5;
 
   if (controls.isLocked && !phoneActive) {
-    const speed = 60.0;
-    velocity.x -= velocity.x * 10.0 * dt;
-    velocity.z -= velocity.z * 10.0 * dt;
-
-    direction.z = Number(move.f) - Number(move.b);
-    direction.x = Number(move.r) - Number(move.l);
-    direction.normalize();
+    const speed = 75.0;
+    velocity.x -= velocity.x * 10.0 * dt; velocity.z -= velocity.z * 10.0 * dt;
+    direction.z = Number(move.f) - Number(move.b); direction.x = Number(move.r) - Number(move.l); direction.normalize();
 
     if (move.f || move.b) velocity.z -= direction.z * speed * dt;
     if (move.l || move.r) velocity.x -= direction.x * speed * dt;
 
-    controls.moveRight(-velocity.x * dt);
-    controls.moveForward(-velocity.z * dt);
-
-    const pos = controls.getObject().position;
+    controls.moveRight(-velocity.x * dt); controls.moveForward(-velocity.z * dt);
+    
     const terrainY = getHeight(pos.x, pos.z);
     
-    pos.y += (terrainY + 3.0 - pos.y) * 0.15; 
-
-    const isMoving = Math.abs(velocity.x) > 0.5 || Math.abs(velocity.z) > 0.5;
     if (isMoving) {
-      stepTimer += dt;
-      if (stepTimer > 0.4) {
-        playFootstep();
-        stepTimer = 0;
-      }
-    } else {
-      stepTimer = 0.4;
-    }
+      headBob += dt * 12; 
+      stepTimer += dt; if (stepTimer > 0.35) { playFootstep(); stepTimer = 0; }
+    } else { headBob = 0; stepTimer = 0.35; }
+
+    const bobOffset = Math.sin(headBob) * 0.3;
+    pos.y += (terrainY + 3.5 + bobOffset - pos.y) * 0.15; 
     
-    if(windFilter) {
-      windFilter.frequency.value = 250 + (pos.y * 5) + Math.sin(now * 0.001) * 150;
+    if(windFilter) windFilter.frequency.value = 300 + (pos.y * 5) + Math.sin(now * 0.001) * 200;
+
+    listener.position.copy(pos);
+  }
+  // ... wewnątrz funkcji animate()
+    controls.moveRight(-velocity.x * dt); 
+    controls.moveForward(-velocity.z * dt);
+    
+    // --- NOWA LOGIKA KOLIZJI ---
+    checkCollisions(pos);
+    // ---------------------------
+    
+    const terrainY = getHeight(pos.x, pos.z);
+// ... reszta kodu
+  if(isMoving && controls.isLocked) {
+    legL.rotation.x = Math.sin(headBob) * 0.6;
+    legR.rotation.x = -Math.sin(headBob) * 0.6;
+  } else {
+    legL.rotation.x = 0; legR.rotation.x = 0;
+  }
+
+  // 3D GRID BUILDING LOGIC
+  if(currentBuildType !== 'none' && previewStructure) {
+    buildRaycaster.setFromCamera(screenCenter, camera);
+    const intersects = buildRaycaster.intersectObjects([ground, ...allBuiltObjects], true);
+    
+    if(intersects.length > 0) {
+      let pt = intersects[0].point;
+      let norm = new THREE.Vector3(0,1,0);
+      
+      if(intersects[0].face) {
+          norm.copy(intersects[0].face.normal);
+          if(intersects[0].object.parent && intersects[0].object.parent.type === "Group") {
+               const normalMatrix = new THREE.Matrix3().getNormalMatrix( intersects[0].object.matrixWorld );
+               norm.applyMatrix3( normalMatrix ).normalize();
+          }
+      }
+
+      let snapX = pt.x + norm.x * 0.1;
+      let snapY = pt.y + norm.y * 0.1;
+      let snapZ = pt.z + norm.z * 0.1;
+
+      let gx = Math.round(snapX / GRID_SIZE) * GRID_SIZE;
+      let gz = Math.round(snapZ / GRID_SIZE) * GRID_SIZE;
+      let gy = Math.floor(snapY / GRID_SIZE) * GRID_SIZE;
+
+      const camEuler = new THREE.Euler().setFromQuaternion(camera.quaternion, "YXZ");
+      let angle = Math.round(camEuler.y / (Math.PI/2)) * (Math.PI/2);
+      previewStructure.rotation.y = angle;
+
+      previewStructure.position.set(gx, gy, gz);
     }
   }
 
-  // --- Network Sync (Throttled to ~20 ticks/sec to save bandwidth) ---
+  if(weatherMode === 'rain') {
+    rainMat.opacity = Math.min(rainMat.opacity + dt * 2.0, 0.65);
+    const rArr = rainGeo.attributes.position.array;
+    for(let i=0; i<rainCount; i++) {
+      rArr[i*3+1] -= dt * 180;
+      if(rArr[i*3+1] < getHeight(rArr[i*3], rArr[i*3+2]) || Math.abs(rArr[i*3] - pos.x) > 175 || Math.abs(rArr[i*3+2] - pos.z) > 175) {
+        rArr[i*3] = pos.x + (Math.random()-0.5)*350;
+        rArr[i*3+1] = pos.y + 110 + Math.random()*40;
+        rArr[i*3+2] = pos.z + (Math.random()-0.5)*350;
+      }
+    }
+    rainGeo.attributes.position.needsUpdate = true;
+  } else {
+    rainMat.opacity = Math.max(rainMat.opacity - dt * 2.0, 0);
+  }
+
   if (myPeerId && now - lastNetworkTick > 50) {
     lastNetworkTick = now;
-    const pos = controls.getObject().position;
-    // Extract Y rotation representing where the player is looking
     const euler = new THREE.Euler().setFromQuaternion(camera.quaternion, "YXZ");
     const myData = [pos.x, pos.y, pos.z, euler.y];
-
     if (isHost) {
-      // Host updates its own state, then broadcasts the entire state dictionary
-      networkPlayers[myPeerId] = myData;
-      updateNetworkMeshes(networkPlayers, myPeerId);
-      
-      const payload = JSON.stringify(networkPlayers);
-      connections.forEach(conn => {
-        if(conn.open) conn.send(networkPlayers);
-      });
-    } else if (hostConnection && hostConnection.open) {
-      // Client sends just their own positional data to Host
-      hostConnection.send(myData);
-    }
+      networkPlayers[myPeerId] = myData; updateNetworkMeshes(networkPlayers, myPeerId);
+      connections.forEach(c => { if(c.open) c.send(networkPlayers); });
+    } else if (hostConnection && hostConnection.open) { hostConnection.send(myData); }
   }
 
-  // --- Environment Animations ---
-  for(let i=0; i<turbines.length; i++) {
-    const t = turbines[i];
-    t.mesh.rotation.z -= dt * t.speed;
-    const timeSec = (now * 0.001) + t.offset;
-    t.light.visible = (timeSec % 2.0) < 1.0; 
-  }
+  turbines.forEach(t => { 
+    t.mesh.rotation.z -= dt * t.speed; 
+    t.light.material.color.setHSL(0, 1, 0.2 + Math.sin(now * 0.002) * 0.3);
+  });
 
-  for(let i=0; i<planes.length; i++) {
-    const p = planes[i];
+  planes.forEach(p => {
     p.group.position.addScaledVector(p.dir, p.speed * dt);
+    p.strobe.visible = ((now * 0.001 + p.offset) % 1.5) < 0.1;
     
-    if(p.group.position.x > 3000) p.group.position.x = -3000;
-    if(p.group.position.x < -3000) p.group.position.x = 3000;
-    if(p.group.position.z > 3000) p.group.position.z = -3000;
-    if(p.group.position.z < -3000) p.group.position.z = 3000;
+    if(p.group.position.x > 4000) p.group.position.x = -4000; else if(p.group.position.x < -4000) p.group.position.x = 4000;
+    if(p.group.position.z > 4000) p.group.position.z = -4000; else if(p.group.position.z < -4000) p.group.position.z = 4000;
+  });
 
-    const tSec = (now * 0.001) + p.offset;
-    p.whiteLight.visible = (tSec % 1.5) < 0.1;
-    p.redLight.visible = (tSec % 3.0) < 1.0;
-  }
+  clouds.forEach(c => {
+    c.mesh.position.x += c.speed * dt;
+    if (c.mesh.position.x > 2000) c.mesh.position.x = -2000;
+  });
+
+  birds.forEach(b => {
+    if(Math.random() < 0.02) {
+      b.targetVelocity.set((Math.random()-0.5), 0, (Math.random()-0.5)).normalize().multiplyScalar(20 + Math.random()*15);
+    }
+    
+    const tHeight = getHeight(b.grp.position.x, b.grp.position.z);
+    if(b.grp.position.y < tHeight + 20) b.targetVelocity.y = 5;
+    else if(b.grp.position.y > 300) b.targetVelocity.y = -5;
+    else b.targetVelocity.y = 0;
+
+    b.velocity.lerp(b.targetVelocity, dt * 0.5);
+    b.grp.position.addScaledVector(b.velocity, dt);
+
+    b.panner.positionX.value = b.grp.position.x;
+    b.panner.positionY.value = b.grp.position.y;
+    b.panner.positionZ.value = b.grp.position.z;
+
+    if(b.grp.position.x > 2000) b.grp.position.x = -2000; else if(b.grp.position.x < -2000) b.grp.position.x = 2000;
+    if(b.grp.position.z > 2000) b.grp.position.z = -2000; else if(b.grp.position.z < -2000) b.grp.position.z = 2000;
+    
+    b.grp.lookAt(b.grp.position.x + b.velocity.x, b.grp.position.y + b.velocity.y, b.grp.position.z + b.velocity.z);
+    
+    const flap = Math.sin(now * 0.001 * b.flapSpeed + b.flapOffset);
+    b.wL.rotation.z = flap * 0.8; b.wR.rotation.z = -flap * 0.8;
+    
+    if(Math.random() < 0.0008) playBirdChirp(b.panner);
+  });
 
   updateEnvironment(dt);
+  updateSpooks(dt, controls.getObject().position);
+  
   vhsPass.uniforms.time.value += dt;
-
   composer.render();
 }
 animate(prevTime);
 
 addEventListener('resize', () => {
-  camera.aspect = innerWidth / innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(innerWidth, innerHeight);
-  composer.setSize(innerWidth, innerHeight);
+  camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight); composer.setSize(innerWidth, innerHeight);
 });
 </script>
 </body>
