@@ -16,52 +16,59 @@
     
     body::after { content: " "; display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06)); z-index: 2; background-size: 100% 2px, 3px 100%; pointer-events: none; mix-blend-mode: overlay;}
 
-    /* Advanced Phone UI */
-    #phone { position: fixed; bottom: -700px; right: 40px; width: 320px; height: 650px; background: #050505; border-radius: 45px; border: 10px solid #1c1c1c; transition: bottom 0.6s cubic-bezier(0.2, 1, 0.3, 1); z-index: 15; padding: 12px; box-shadow: 0 25px 50px rgba(0,0,0,0.9), inset 0 0 20px rgba(255,255,255,0.05); }
+    /* RETRO PHONE UI */
+    #phone { position: fixed; bottom: -800px; right: 40px; width: 280px; height: 620px; background: #c2c2b6; border-radius: 20px; border: 4px solid #8a8a82; border-bottom: 25px solid #a3a398; transition: bottom 0.6s cubic-bezier(0.2, 1, 0.3, 1); z-index: 15; padding: 20px; box-shadow: -15px 25px 30px rgba(0,0,0,0.8), inset -4px -4px 10px rgba(0,0,0,0.3), inset 4px 4px 10px rgba(255,255,255,0.5); display: flex; flex-direction: column; gap: 15px; }
     #phone.active { bottom: 20px; }
-    #phone .screen { background: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=600&auto=format&fit=crop') center/cover; height: 100%; border-radius: 35px; overflow: hidden; position: relative; color: white; text-align: center; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; box-shadow: inset 0 0 30px rgba(0,0,0,0.9); pointer-events: auto;}
-    #phone .screen::before { content: ''; position: absolute; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(5px); z-index: 0; }
+    .brand-name { text-align: center; font-family: Impact, sans-serif; font-size: 18px; color: #555; letter-spacing: 2px; margin-top: -10px; text-shadow: 1px 1px 0px rgba(255,255,255,0.5); }
     
-    #phone .notch { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 140px; height: 32px; background: #050505; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; z-index: 20; box-shadow: inset 0 -2px 5px rgba(255,255,255,0.05); }
-    #phone .status-bar { display: flex; justify-content: space-between; padding: 10px 24px 0 24px; font-size: 12px; font-weight: 600; color: #fff; z-index: 10; position: relative; text-shadow: 0 1px 3px rgba(0,0,0,0.8);}
+    #phone .screen { background: #8ca56e; border: 6px solid #4a4a4a; height: 320px; border-radius: 5px; overflow: hidden; position: relative; color: #111; text-align: center; font-family: "Courier New", monospace; box-shadow: inset 0 0 15px rgba(0,0,0,0.4); pointer-events: auto; }
+    #phone .screen::before { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.05) 2px, rgba(0,0,0,0.05) 4px); z-index: 0; pointer-events: none;}
     
-    #phone .time-container { margin-top: 60px; position: relative; z-index: 1; text-shadow: 0 4px 15px rgba(0,0,0,0.6); }
-    #phone .time { font-size: 64px; font-weight: 200; letter-spacing: -1px; line-height: 1; }
+    #phone .notch { display: none; }
+    #phone .status-bar { display: flex; justify-content: space-between; padding: 5px 10px 0 10px; font-size: 12px; font-weight: bold; color: #111; z-index: 10; position: relative; border-bottom: 2px solid rgba(0,0,0,0.2); margin-bottom: 5px;}
     
-    #phone .apps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px 12px; padding: 0 20px; margin-top: 30px; position: relative; z-index: 1; }
+    #phone .time-container { margin-top: 5px; position: relative; z-index: 1; }
+    #phone .time { font-size: 32px; font-weight: bold; letter-spacing: -1px; line-height: 1; }
+    
+    #phone .apps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; padding: 0 10px; margin-top: 10px; position: relative; z-index: 1; }
     #phone .app-container { display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: transform 0.1s;}
     #phone .app-container:active { transform: scale(0.9); }
-    #phone .app { width: 55px; height: 55px; border-radius: 16px; background-size: cover; box-shadow: 0 5px 15px rgba(0,0,0,0.5); position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: center; align-items: center; font-size: 24px;}
-    #phone .app::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 50%); pointer-events: none; }
-    #phone .app-label { font-size: 11px; margin-top: 6px; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.8); font-weight: 500;}
+    #phone .app { width: 45px; height: 35px; border-radius: 4px; background: transparent; border: 2px solid #222; display: flex; justify-content: center; align-items: center; font-size: 14px; font-weight: bold; color: #111;}
+    #phone .app-label { font-size: 10px; margin-top: 2px; color: #111; font-weight: bold;}
 
-    #phone .mp-widget { margin: 25px 20px; padding: 15px; background: rgba(20,20,20,0.6); border-radius: 20px; backdrop-filter: blur(15px); font-size: 13px; color: #e0e0e0; border: 1px solid rgba(255,255,255,0.1); text-align: left; position: relative; z-index: 1; box-shadow: 0 10px 20px rgba(0,0,0,0.3);}
-    #phone .mp-controls { display: flex; justify-content: space-between; margin-top: 12px; }
-    #phone .btn { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 10px 0; border-radius: 12px; cursor: pointer; font-size: 13px; font-weight: 600; width: 48%; backdrop-filter: blur(5px); transition: all 0.2s;}
-    #phone .btn:hover { background: rgba(255,255,255,0.2); transform: translateY(-2px);}
+    #phone .mp-widget { margin: 5px 10px; padding: 5px; border-top: 2px solid rgba(0,0,0,0.2); border-bottom: 2px solid rgba(0,0,0,0.2); font-size: 11px; color: #111; text-align: left; position: relative; z-index: 1; font-weight: bold;}
+    #phone .mp-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-top: 5px; }
+    #phone .btn { background: transparent; color: #111; border: 2px solid #222; padding: 4px 0; cursor: pointer; font-size: 10px; font-weight: bold; font-family: "Courier New", monospace;}
+    #phone .btn:hover { background: #222; color: #8ca56e;}
 
+    /* Hardware Keypad */
+    .keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px 12px; padding: 5px 20px; }
+    .key { background: #e0e0d6; border-radius: 8px 8px 15px 15px; border: 2px solid #999; border-bottom: 4px solid #777; height: 35px; display: flex; justify-content: center; align-items: center; font-family: Arial, sans-serif; font-weight: bold; font-size: 16px; color: #333; cursor: pointer; box-shadow: 0 3px 5px rgba(0,0,0,0.2);}
+    .key:active { transform: translateY(2px); border-bottom: 2px solid #777; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+    .key span { font-size: 9px; display: block; margin-top: -2px; color: #666; }
+    
     /* Sub-Apps */
-    .app-screen { display: none; position: absolute; inset: 0; background: #111; z-index: 50; flex-direction: column; }
-    .app-header { padding: 40px 15px 15px; background: #222; text-align: left; font-weight: bold; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center;}
-    .close-btn { background: none; border: none; color: #0a84ff; font-size: 16px; cursor: pointer; }
+    .app-screen { display: none; position: absolute; inset: 0; background: #8ca56e; z-index: 50; flex-direction: column; color: #111;}
+    .app-header { padding: 10px; background: #7a935c; text-align: left; font-weight: bold; border-bottom: 2px solid #222; display: flex; justify-content: space-between; align-items: center;}
+    .close-btn { background: none; border: 2px solid #111; color: #111; font-size: 12px; cursor: pointer; font-weight: bold; font-family: "Courier New", monospace;}
     
     /* Contacts App */
-    #chat-log { flex: 1; overflow-y: auto; padding: 10px; font-size: 13px; text-align: left; color: #fff; display: flex; flex-direction: column; gap: 8px;}
-    .chat-msg { background: #333; padding: 8px 12px; border-radius: 15px; width: fit-content; max-width: 80%; word-wrap: break-word;}
-    .chat-msg.self { background: #0a84ff; align-self: flex-end; }
-    #chat-input-area { padding: 10px; display: flex; gap: 5px; background: #222;}
-    #chat-input { flex: 1; border-radius: 15px; border: none; padding: 8px 12px; background: #000; color: #fff; outline: none;}
-    #chat-send { background: #0a84ff; color: #fff; border: none; border-radius: 15px; padding: 0 15px; font-weight: bold; cursor: pointer;}
+    #chat-log { flex: 1; overflow-y: auto; padding: 5px; font-size: 11px; text-align: left; display: flex; flex-direction: column; gap: 4px;}
+    .chat-msg { border: 1px dashed #222; padding: 4px; width: fit-content; max-width: 90%; word-wrap: break-word;}
+    .chat-msg.self { background: rgba(0,0,0,0.1); align-self: flex-end; }
+    #chat-input-area { padding: 5px; display: flex; gap: 5px; border-top: 2px solid #222;}
+    #chat-input { flex: 1; border: 2px solid #222; background: transparent; padding: 4px; color: #111; outline: none; font-family: "Courier New", monospace; font-weight: bold;}
+    #chat-send { background: #222; color: #8ca56e; border: none; padding: 0 10px; font-weight: bold; cursor: pointer; font-family: "Courier New", monospace;}
     
     /* Music App */
     .music-controls { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 20px;}
-    .toggle-btn { width: 120px; height: 120px; border-radius: 50%; background: #333; border: 4px solid #444; color: #fff; font-size: 18px; cursor: pointer; transition: all 0.2s;}
-    .toggle-btn.active { background: #34c759; border-color: #248a3d; box-shadow: 0 0 20px #34c759;}
+    .toggle-btn { width: 80px; height: 80px; border-radius: 50%; background: transparent; border: 4px solid #111; color: #111; font-size: 16px; font-weight: bold; cursor: pointer; font-family: "Courier New", monospace; }
+    .toggle-btn.active { background: #111; color: #8ca56e; }
 
     /* Build App Styles */
-    .build-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 15px; overflow-y: auto; flex: 1; align-content: start;}
-    .build-item-btn { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; border-radius: 14px; padding: 12px 10px; font-size: 12px; cursor: pointer; font-weight: bold; display: flex; flex-direction: column; align-items: center; gap: 5px; transition: all 0.2s; }
-    .build-item-btn:hover { background: rgba(255,255,255,0.15); transform: translateY(-2px); }
+    .build-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; padding: 5px; overflow-y: auto; flex: 1; align-content: start;}
+    .build-item-btn { background: transparent; border: 2px solid #222; color: #111; padding: 8px 5px; font-size: 10px; cursor: pointer; font-weight: bold; display: flex; flex-direction: column; align-items: center; gap: 5px; font-family: "Courier New", monospace;}
+    .build-item-btn:hover { background: #222; color: #8ca56e; }
 
     /* Camera Flash */
     #flash { position: fixed; inset: 0; background: #fff; opacity: 0; pointer-events: none; z-index: 100; transition: opacity 0.1s; }
@@ -79,96 +86,124 @@
 <body>
 <div id="blocker"><span>Initialize Link</span></div>
 <div id="crosshair"></div>
-<div id="hud">W A S D - MOVE | MOUSE - LOOK | P - PHONE <br><span id="buildStatus" style="color: #ffcc00; display: none;">BUILD MODE (GRID ACTIVE) - CLICK TO PLACE</span></div>
+<div id="hud">W A S D - MOVE | SPACE - JUMP | MOUSE - LOOK | P - PHONE <br><span id="buildStatus" style="color: #ffcc00; display: none;">BUILD MODE - CLICK TO PLACE</span></div>
 <div id="hint">ENV: <span id="timeDisplay">SYNCING...</span></div>
 <div id="flash"></div>
 
 <div id="phone">
+  <div class="brand-name">TECHNOKIA 9000</div>
   <div class="screen">
     <div class="notch"></div>
     <div class="status-bar">
-      <span class="signal">ill LTE</span>
-      <span class="battery">14% ⚡</span>
+      <span class="signal">ill GSM</span>
+      <span class="battery">[## ]</span>
     </div>
     <div class="time-container">
       <div class="time" id="phoneTime">--:--</div>
     </div>
     
     <div class="mp-widget">
-      <div style="margin-bottom: 8px; font-weight: 600; letter-spacing: 1px;">PEER LINK</div>
-      <div style="margin-bottom: 5px; font-size: 11px;">STATE: <span id="mp-status" style="color: #4cd964;">AWAITING</span></div>
+      <div>LINK ID: <span id="mp-status">OFFLINE</span></div>
       <div class="mp-controls">
         <button id="btnHost" class="btn">HOST</button>
         <button id="btnJoin" class="btn">JOIN</button>
+        <button class="btn" style="grid-column: span 2;" onclick="copyId()">COPY ID TO CLIPBOARD</button>
       </div>
     </div>
 
     <div class="apps">
-      <div class="app-container" onclick="takePicture()"><div class="app" style="background: #e1e1e1; color: #000;">📷</div><span class="app-label">Camera</span></div>
-      <div class="app-container" onclick="openApp('contacts-app')"><div class="app" style="background: linear-gradient(135deg, #4cd964, #34c759)">💬</div><span class="app-label">Contacts</span></div>
-      <div class="app-container" onclick="openApp('music-app')"><div class="app" style="background: linear-gradient(135deg, #ff2d55, #d81b43)">🎵</div><span class="app-label">Music</span></div>
-      <div class="app-container" onclick="openApp('build-app')"><div class="app" style="background: linear-gradient(135deg, #ff9500, #ffcc00)">🔨</div><span class="app-label">Build</span></div>
-      <div class="app-container" onclick="openApp('weather-app')"><div class="app" style="background: linear-gradient(135deg, #5ac8fa, #007aff)">⛅</div><span class="app-label">Weather</span></div>
+      <div class="app-container" onclick="takePicture()"><div class="app">[CAM]</div><span class="app-label">Camera</span></div>
+      <div class="app-container" onclick="openApp('contacts-app')"><div class="app">[MSG]</div><span class="app-label">Chat</span></div>
+      <div class="app-container" onclick="openApp('music-app')"><div class="app">[SND]</div><span class="app-label">Music</span></div>
+      <div class="app-container" onclick="openApp('build-app')"><div class="app">[BLD]</div><span class="app-label">Build</span></div>
+      <div class="app-container" onclick="openApp('weather-app')"><div class="app">[WTH]</div><span class="app-label">Weather</span></div>
+      <div class="app-container" onclick="openApp('time-app')"><div class="app">[CLK]</div><span class="app-label">Time</span></div>
     </div>
 
     <div id="contacts-app" class="app-screen">
       <div class="app-header">
-        <span>Global Chat</span>
-        <button class="close-btn" onclick="closeApp('contacts-app')">Close</button>
+        <span>SMS CHAT</span>
+        <button class="close-btn" onclick="closeApp('contacts-app')">X</button>
       </div>
       <div id="chat-log"></div>
       <div id="chat-input-area">
-        <input type="text" id="chat-input" placeholder="Message..." autocomplete="off" />
-        <button id="chat-send" onclick="sendChat()">Send</button>
+        <input type="text" id="chat-input" placeholder="Type..." autocomplete="off" />
+        <button id="chat-send" onclick="sendChat()">>></button>
       </div>
     </div>
 
     <div id="music-app" class="app-screen">
       <div class="app-header">
-        <span>Generative Ambient</span>
-        <button class="close-btn" onclick="closeApp('music-app')">Close</button>
+        <span>AUDIO SYS</span>
+        <button class="close-btn" onclick="closeApp('music-app')">X</button>
       </div>
       <div class="music-controls">
-        <button id="musicToggle" class="toggle-btn" onclick="toggleMusic()">OFF</button>
-        <p style="color:#aaa; font-size:12px; text-align:center; padding:20px;">Procedural C-Minor Pentatonic Synth Engine</p>
+        <button id="musicToggle" class="toggle-btn" onclick="toggleMusic()">PLAY</button>
+        <p style="font-size:10px; font-weight:bold;">SYNTH ENGINE V1.0</p>
+      </div>
+    </div>
+    
+    <div id="time-app" class="app-screen">
+      <div class="app-header">
+        <span>TIME SYS</span>
+        <button class="close-btn" onclick="closeApp('time-app')">X</button>
+      </div>
+      <div class="music-controls">
+        <button class="toggle-btn" onclick="changeTimeSpeed(0.003)">NORM</button>
+        <button class="toggle-btn" onclick="changeTimeSpeed(0.05)">FAST</button>
+        <p style="font-size:10px; font-weight:bold;">TEMPORAL CONTROL</p>
       </div>
     </div>
 
     <div id="build-app" class="app-screen">
       <div class="app-header">
-        <span>Structure Builder</span>
-        <button class="close-btn" onclick="closeApp('build-app')">Close</button>
+        <span>BUILDER</span>
+        <button class="close-btn" onclick="closeApp('build-app')">X</button>
       </div>
       <div class="build-grid">
-        <button class="build-item-btn" onclick="selectBuild('floor')"><span style="font-size:20px;">🔲</span>Floor/Ceiling</button>
-        <button class="build-item-btn" onclick="selectBuild('wall')"><span style="font-size:20px;">🧱</span>Wall</button>
-        <button class="build-item-btn" onclick="selectBuild('window')"><span style="font-size:20px;">🪟</span>Window</button>
-        <button class="build-item-btn" onclick="selectBuild('stairs')"><span style="font-size:20px;">🪜</span>Stairs</button>
-        <button class="build-item-btn" onclick="selectBuild('chair')"><span style="font-size:20px;">🪑</span>Chair</button>
-        <button class="build-item-btn" onclick="selectBuild('table')"><span style="font-size:20px;">🪑</span>Table</button>
-        <button class="build-item-btn" onclick="selectBuild('lamp')"><span style="font-size:20px;">🏮</span>Street Lamp</button>
-        <button class="build-item-btn" onclick="selectBuild('light')"><span style="font-size:20px;">💡</span>Point Light</button>
-        <button class="build-item-btn" style="background: rgba(255,59,48,0.2); border-color: #ff3b30; grid-column: span 2;" onclick="selectBuild('none')">Cancel Mode</button>
+        <button class="build-item-btn" onclick="selectBuild('floor')">FLOOR</button>
+        <button class="build-item-btn" onclick="selectBuild('wall')">WALL</button>
+        <button class="build-item-btn" onclick="selectBuild('window')">WINDOW</button>
+        <button class="build-item-btn" onclick="selectBuild('stairs')">STAIRS</button>
+        <button class="build-item-btn" onclick="selectBuild('chair')">CHAIR</button>
+        <button class="build-item-btn" onclick="selectBuild('table')">TABLE</button>
+        <button class="build-item-btn" onclick="selectBuild('lamp')">LAMP</button>
+        <button class="build-item-btn" onclick="selectBuild('light')">LIGHT</button>
+        <button class="build-item-btn" style="border-color:#111; grid-column: span 2;" onclick="selectBuild('none')">CANCEL</button>
       </div>
     </div>
 
     <div id="weather-app" class="app-screen">
       <div class="app-header">
-        <span>Atmosphere Engine</span>
-        <button class="close-btn" onclick="closeApp('weather-app')">Close</button>
+        <span>METEO SYS</span>
+        <button class="close-btn" onclick="closeApp('weather-app')">X</button>
       </div>
       <div class="music-controls">
         <button id="weatherToggle" class="toggle-btn" onclick="toggleWeather()">CLEAR</button>
-        <p style="color:#aaa; font-size:12px; text-align:center; padding:20px;" id="weatherDesc">Dynamic particle simulation and mist density controller.</p>
+        <p style="font-size:10px; font-weight:bold;" id="weatherDesc">ATMOSPHERE OVERRIDE</p>
       </div>
     </div>
 
+  </div>
+  
+  <div class="keypad">
+    <div class="key">1<span></span></div><div class="key">2<span>ABC</span></div><div class="key">3<span>DEF</span></div>
+    <div class="key">4<span>GHI</span></div><div class="key">5<span>JKL</span></div><div class="key">6<span>MNO</span></div>
+    <div class="key">7<span>PQRS</span></div><div class="key">8<span>TUV</span></div><div class="key">9<span>WXYZ</span></div>
+    <div class="key">*<span></span></div><div class="key">0<span>_</span></div><div class="key">#<span></span></div>
   </div>
 </div>
 
 <script>
   function openApp(id) { document.getElementById(id).style.display = 'flex'; }
   function closeApp(id) { document.getElementById(id).style.display = 'none'; }
+  window.copyId = function() {
+    if(window.myPeerId) {
+        navigator.clipboard.writeText(window.myPeerId);
+        document.getElementById('mp-status').innerHTML = "COPIED!";
+        setTimeout(() => document.getElementById('mp-status').innerHTML = window.myPeerId, 1000);
+    }
+  }
 </script>
 
 <script type="module">
@@ -233,11 +268,11 @@ window.toggleMusic = function() {
   musicEnabled = !musicEnabled;
   const btn = document.getElementById('musicToggle');
   if(musicEnabled) {
-    btn.classList.add('active'); btn.innerText = "ON";
+    btn.classList.add('active'); btn.innerText = "STOP";
     if (audioCtx.state === 'suspended') audioCtx.resume();
     scheduleNextNote();
   } else {
-    btn.classList.remove('active'); btn.innerText = "OFF";
+    btn.classList.remove('active'); btn.innerText = "PLAY";
   }
 }
 
@@ -277,6 +312,7 @@ function startAudio() {
 
 // ---------- HYPER-REALISTIC RENDERER SETUP ----------
 const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x4a7a9c, 0.001); // Added Dynamic Fog System
 
 const camera = new THREE.PerspectiveCamera(70, innerWidth/innerHeight, 0.1, 5000); 
 camera.add(listener);
@@ -290,7 +326,7 @@ renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.2;
 document.body.appendChild(renderer.domElement);
 
-// ---------- PROCEDURAL TERRAIN MAPS ----------
+// ---------- PROCEDURAL TERRAIN & ROAD GENERATION ----------
 function hash(x, y) { return fract(Math.sin(x * 12.9898 + y * 78.233) * 43758.5453); }
 function fract(x) { return x - Math.floor(x); }
 function noise(x, y) {
@@ -304,7 +340,20 @@ function fbm(x, z) {
   for(let i=0; i<4; i++) { total += noise(x * frequency, z * frequency) * amplitude; maxValue += amplitude; amplitude *= 0.5; frequency *= 2.0; }
   return (total / maxValue);
 }
-function getHeight(x, z) { return fbm(x, z) * 60; }
+function smoothstep(min, max, value) {
+  var x = Math.max(0, Math.min(1, (value-min)/(max-min)));
+  return x*x*(3 - 2*x);
+}
+function getHeight(x, z) { 
+  let h = fbm(x, z) * 60; 
+  // Generate a procedural road trench along the Z-axis (x = 0)
+  let roadDist = Math.abs(x);
+  if(roadDist < 30) {
+      let blend = smoothstep(0, 30, roadDist);
+      h = h * blend + 2.0 * (1.0 - blend); // Flatten road height to ~2.0
+  }
+  return h;
+}
 
 function createPBRMaps(size, hex1, hex2, scale) {
   const canvas = document.createElement('canvas'); canvas.width = size; canvas.height = size;
@@ -326,7 +375,6 @@ function createPBRMaps(size, hex1, hex2, scale) {
 // ---------- LIGHTING & ENVIRONMENT ----------
 const sunLight = new THREE.DirectionalLight(0xfff5e6, 4.0);
 sunLight.castShadow = true; 
-// OPTIMIZATION: Reduced shadow map size from 4096 to 2048 to fix lag
 sunLight.shadow.mapSize.width = 2048; sunLight.shadow.mapSize.height = 2048;
 sunLight.shadow.camera.near = 10; sunLight.shadow.camera.far = 2500;
 const d = 800; sunLight.shadow.camera.left = -d; sunLight.shadow.camera.right = d;
@@ -339,7 +387,7 @@ flashlight.castShadow = true; flashlight.shadow.mapSize.width = 1024; flashlight
 flashlight.position.set(0.5, -0.2, 0.5); flashlight.target.position.set(0, 0, -1);
 camera.add(flashlight); camera.add(flashlight.target);
 
-// Visible Celestial Bodies (Triggers Bloom)
+// Visible Celestial Bodies
 const sunMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(5.0, 4.8, 4.5) });
 const sunMesh = new THREE.Mesh(new THREE.SphereGeometry(80, 32, 32), sunMat);
 scene.add(sunMesh);
@@ -348,7 +396,7 @@ const moonMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(1.2, 1.5, 2
 const moonMesh = new THREE.Mesh(new THREE.SphereGeometry(50, 32, 32), moonMat);
 scene.add(moonMesh);
 
-// ---------- NEW FEATURE: ADVANCED SKY GRADIENT DOME & STARS & CLOUDS ----------
+// Sky Gradient Dome & Stars & Clouds
 const skyGeo = new THREE.SphereGeometry(3500, 32, 15);
 const skyMat = new THREE.ShaderMaterial({
   uniforms: {
@@ -381,7 +429,6 @@ const skyMat = new THREE.ShaderMaterial({
 const skyDome = new THREE.Mesh(skyGeo, skyMat);
 scene.add(skyDome);
 
-// Procedural Stars
 const starCount = 1500;
 const starGeo = new THREE.BufferGeometry();
 const starPositions = new Float32Array(starCount * 3);
@@ -398,7 +445,6 @@ const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 2.5, transpare
 const starPoints = new THREE.Points(starGeo, starMat);
 scene.add(starPoints);
 
-// Volumetric Cloud Blocks
 const clouds = [];
 const cloudGroup = new THREE.Group();
 scene.add(cloudGroup);
@@ -418,9 +464,8 @@ for(let i=0; i<25; i++) {
   clouds.push({ mesh: cloud, speed: 6 + Math.random()*12 });
 }
 
-// ---------- PBR TERRAIN ----------
+// ---------- PBR TERRAIN & ROAD MESH ----------
 const SIZE = 4000; 
-// OPTIMIZATION: Terrain segments reduced from 512 to 128 (MASSIVE performance boost)
 const SEG = 128; 
 const terrainGeo = new THREE.PlaneGeometry(SIZE, SIZE, SEG, SEG); terrainGeo.rotateX(-Math.PI/2);
 const posAttr = terrainGeo.attributes.position;
@@ -431,7 +476,35 @@ const groundTex = createPBRMaps(512, 0x151c10, 0x222e18, 0.02);
 const terrainMat = new THREE.MeshPhysicalMaterial({ map: groundTex, roughness: 0.85, metalness: 0.05 });
 const ground = new THREE.Mesh(terrainGeo, terrainMat); ground.receiveShadow = true; scene.add(ground);
 
-// ---------- GPU WIND SHADER FOR VEGETATION ----------
+// Highway generation
+const roadGeo = new THREE.PlaneGeometry(30, SIZE, 1, SEG); roadGeo.rotateX(-Math.PI/2);
+const rPosAttr = roadGeo.attributes.position;
+for(let i=0; i<rPosAttr.count; i++) rPosAttr.setY(i, getHeight(rPosAttr.getX(i), rPosAttr.getZ(i)) + 0.1);
+const roadMatOverlay = new THREE.MeshStandardMaterial({ color: 0x2a2a2a, roughness: 0.8, metalness: 0.2 });
+const roadMesh = new THREE.Mesh(roadGeo, roadMatOverlay);
+roadMesh.receiveShadow = true;
+scene.add(roadMesh);
+
+// Highway Vehicles AI
+const roadVehicles = [];
+const vMat1 = new THREE.MeshPhysicalMaterial({ color: 0xaa2222, roughness: 0.2, clearcoat: 1 });
+const vMat2 = new THREE.MeshPhysicalMaterial({ color: 0x2222aa, roughness: 0.2, clearcoat: 1 });
+const vMat3 = new THREE.MeshPhysicalMaterial({ color: 0xaaaaaa, roughness: 0.2, clearcoat: 1 });
+const vGeom = new THREE.BoxGeometry(4, 3, 10);
+vGeom.translate(0, 1.5, 0);
+
+for(let i=0; i<20; i++) {
+    let mats = [vMat1, vMat2, vMat3];
+    let car = new THREE.Mesh(vGeom, mats[i % 3]);
+    let isForward = i % 2 === 0;
+    car.position.x = isForward ? 8 : -8; // Lanes
+    car.position.z = (Math.random() - 0.5) * SIZE;
+    car.castShadow = true; car.receiveShadow = true;
+    scene.add(car);
+    roadVehicles.push({ mesh: car, speed: 60 + Math.random()*20, dir: isForward ? 1 : -1 });
+}
+
+// GPU WIND SHADER FOR VEGETATION
 const customUniforms = { time: { value: 0 } };
 function injectWindShader(shader) {
   shader.uniforms.time = customUniforms.time;
@@ -444,12 +517,10 @@ function injectWindShader(shader) {
   );
 }
 
-// OPTIMIZATION: Dropped veg count for performance & disabled shadows on grass
 const VEG_COUNT = 150000;
 const bladeGeo = new THREE.ConeGeometry(0.15, 2.2, 3); bladeGeo.translate(0, 1.1, 0);
 const grassMat = new THREE.MeshPhysicalMaterial({ color: 0x1a4513, roughness: 0.7 }); grassMat.onBeforeCompile = injectWindShader;
 const grassMesh = new THREE.InstancedMesh(bladeGeo, grassMat, VEG_COUNT); 
-// grassMesh.receiveShadow = false; grassMesh.castShadow = false; // No shadows to fix lag
 
 const wheatGeo = new THREE.ConeGeometry(0.2, 4.0, 4); wheatGeo.translate(0, 2.0, 0);
 const wheatMat = new THREE.MeshPhysicalMaterial({ color: 0x8a6b22, roughness: 0.9 }); wheatMat.onBeforeCompile = injectWindShader;
@@ -458,6 +529,7 @@ const wheatMesh = new THREE.InstancedMesh(wheatGeo, wheatMat, Math.floor(VEG_COU
 const dummy = new THREE.Object3D(); let gIdx = 0, wIdx = 0;
 for(let i=0; i<VEG_COUNT * 1.5; i++){
   const x = (Math.random() - 0.5) * SIZE * 0.8; const z = (Math.random() - 0.5) * SIZE * 0.8;
+  if(Math.abs(x) < 30) continue; // Keep road clear
   const y = getHeight(x, z); const b = fbm(x*2, z*2);
   dummy.position.set(x, y, z); dummy.rotation.y = Math.random() * Math.PI;
   if (b > 0.5 && wIdx < Math.floor(VEG_COUNT/2)) { dummy.scale.setScalar(0.8 + Math.random() * 0.5); dummy.updateMatrix(); wheatMesh.setMatrixAt(wIdx++, dummy.matrix); } 
@@ -465,7 +537,6 @@ for(let i=0; i<VEG_COUNT * 1.5; i++){
 }
 scene.add(grassMesh); scene.add(wheatMesh);
 
-// OPTIMIZATION: Reduced tree count
 const TREE_COUNT = 800;
 const trunkGeo = new THREE.CylinderGeometry(0.6, 1.2, 8, 7); trunkGeo.translate(0, 4, 0);
 const leavesGeo = new THREE.IcosahedronGeometry(4.5, 2); leavesGeo.translate(0, 9, 0);
@@ -481,6 +552,7 @@ let tIdx = 0;
 while(tIdx < TREE_COUNT) {
   const x = (Math.random() - 0.5) * SIZE * 0.9; const z = (Math.random() - 0.5) * SIZE * 0.9;
   if(Math.abs(x) < 50 && Math.abs(z) < 50) continue; 
+  if(Math.abs(x) < 35) continue; // Keep road clear
   const y = getHeight(x, z); const scale = 0.7 + Math.random() * 1.8;
   dummy.position.set(x, y, z); dummy.rotation.y = Math.random() * Math.PI;
   dummy.scale.set(scale, scale + Math.random(), scale); dummy.updateMatrix();
@@ -488,7 +560,7 @@ while(tIdx < TREE_COUNT) {
 }
 scene.add(trunks); scene.add(leaves);
 
-// ---------- GIANT TURBINES ----------
+// GIANT TURBINES
 const turbines = [];
 const turbineMat = new THREE.MeshPhysicalMaterial({ color: 0xe0e0e0, roughness: 0.2, metalness: 0.6 });
 const redLightMat = new THREE.MeshBasicMaterial({ color: 0xff0000 }); 
@@ -541,7 +613,7 @@ for(let i=0; i<40; i++) {
   turbines.push({ mesh: rotor, speed: 0.05 + Math.random() * 0.1, light: light });
 }
 
-// ---------- REALISTIC PROCEDURAL PLANES ----------
+// REALISTIC PROCEDURAL PLANES
 function createRealisticPlane() {
   const planeGrp = new THREE.Group();
   const hullMat = new THREE.MeshPhysicalMaterial({ color: 0xdddddd, metalness: 0.6, roughness: 0.2, clearcoat: 0.8 });
@@ -625,7 +697,7 @@ for(let i=0; i<5; i++) {
   });
 }
 
-// ---------- BIRDS WITH AI & SPATIAL AUDIO ----------
+// BIRDS WITH AI & SPATIAL AUDIO
 const BIRD_COUNT = 40;
 const birds = [];
 const bodyGeo = new THREE.ConeGeometry(0.3, 1.5, 4); bodyGeo.rotateX(Math.PI/2);
@@ -652,7 +724,7 @@ for(let i=0; i<BIRD_COUNT; i++) {
   });
 }
 
-// ---------- SPOOKY DIRECTOR ----------
+// SPOOKY DIRECTOR
 const eyesGeo = new THREE.SphereGeometry(0.5, 8, 8);
 const eyesMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
 const spookyEyes = new THREE.Group();
@@ -692,12 +764,12 @@ function updateSpooks(dt, playerPos) {
   }
 }
 
-// ---------- CONTROLS & UI ----------
+// CONTROLS & UI
 const controls = new PointerLockControls(camera, document.body);
 const blocker = document.getElementById('blocker');
 
 blocker.addEventListener('click', (e) => {
-  if(phoneActive && e.clientY > innerHeight - 700 && e.clientX > innerWidth - 360) return;
+  if(phoneActive && e.clientY > innerHeight - 800 && e.clientX > innerWidth - 320) return;
   controls.lock();
   if (audioCtx.state === 'suspended') { audioCtx.resume(); startAudio(); }
 });
@@ -707,6 +779,8 @@ scene.add(controls.getObject());
 
 let move = { f:0, b:0, l:0, r:0 };
 let phoneActive = false;
+let yVelocity = 0;
+let isGrounded = false;
 
 addEventListener('keydown', e => {
   if(document.activeElement === document.getElementById('chat-input')) {
@@ -715,6 +789,7 @@ addEventListener('keydown', e => {
   }
   if(e.code==='KeyW') move.f=1; if(e.code==='KeyS') move.b=1;
   if(e.code==='KeyA') move.l=1; if(e.code==='KeyD') move.r=1;
+  if(e.code==='Space' && isGrounded && !phoneActive) { yVelocity = 15; isGrounded = false; } // IMPROVED PHYSICS: Added actual jumping mechanics
   if(e.code==='KeyP') {
     phoneActive = !phoneActive; document.getElementById('phone').classList.toggle('active', phoneActive);
     if(phoneActive) document.exitPointerLock(); else controls.lock();
@@ -739,7 +814,7 @@ window.takePicture = function() {
   });
 }
 
-// ---------- DYNAMIC WEATHER SYSTEM (RAIN) ----------
+// DYNAMIC WEATHER SYSTEM (RAIN)
 let weatherMode = 'clear';
 const rainCount = 12000;
 const rainGeo = new THREE.BufferGeometry();
@@ -759,16 +834,16 @@ window.toggleWeather = function() {
   const desc = document.getElementById('weatherDesc');
   if (weatherMode === 'clear') {
     weatherMode = 'rain';
-    btn.classList.add('active'); btn.innerText = "RAIN";
-    desc.innerText = "Simulating dense downpour particles and high atmospheric humidity.";
+    btn.innerText = "RAIN";
+    desc.innerText = "DOWNPOUR SIMULATION ENABLED";
   } else {
     weatherMode = 'clear';
-    btn.classList.remove('active'); btn.innerText = "CLEAR";
-    desc.innerText = "Standard clearing skies. Standard rendering setup.";
+    btn.innerText = "CLEAR";
+    desc.innerText = "STANDARD ATMOSPHERE ENABLED";
   }
 }
 
-// ---------- PLAYER BODY VISIBILITY ----------
+// PLAYER BODY VISIBILITY
 const bodyGroup = new THREE.Group();
 const suitMat = new THREE.MeshPhysicalMaterial({ color: 0x141414, roughness: 0.6, metalness: 0.2 });
 const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 1.4, 12), suitMat);
@@ -783,7 +858,7 @@ bodyGroup.add(legR);
 
 controls.getObject().add(bodyGroup);
 
-// ---------- ADVANCED MODULAR BUILDING SYSTEM WITH 3D GRID & NEW ELEMENTS ----------
+// ADVANCED MODULAR BUILDING SYSTEM WITH 3D GRID
 let currentBuildType = 'none';
 let previewStructure = null;
 const allBuiltObjects = [];
@@ -868,7 +943,6 @@ window.selectBuild = function(type) {
   
   previewStructure = structureGenerators[type]();
   
-  // Make preview transparent green
   previewStructure.traverse(child => { 
       if(child.isMesh) { 
           child.material = new THREE.MeshBasicMaterial({ color: 0x00ff66, wireframe: true, transparent: true, opacity: 0.5 }); 
@@ -895,7 +969,8 @@ window.addEventListener('click', () => {
 });
 
 // ---------- MULTIPLAYER (WEBRTC) & CHAT APP ----------
-let peer = null, isHost = false, connections = [], hostConnection = null, myPeerId = null;
+let peer = null, isHost = false, connections = [], hostConnection = null;
+window.myPeerId = null;
 const networkPlayers = {}, playerMeshes = {}; 
 const avatarGeo = new THREE.CapsuleGeometry(0.6, 1.6, 4, 16);
 const avatarMat = new THREE.MeshPhysicalMaterial({ color: 0x444444, metalness: 0.8, roughness: 0.2 });
@@ -912,13 +987,13 @@ function appendChat(sender, msg, isSelf=false) {
 window.sendChat = function() {
   const input = document.getElementById('chat-input');
   const text = input.value.trim();
-  if(!text || !myPeerId) return;
+  if(!text || !window.myPeerId) return;
   
-  const payload = { type: 'chat', text: text, sender: myPeerId };
+  const payload = { type: 'chat', text: text, sender: window.myPeerId };
   if(isHost) { connections.forEach(c => c.send(payload)); } 
   else if(hostConnection) { hostConnection.send(payload); }
   
-  appendChat(myPeerId, text, true);
+  appendChat(window.myPeerId, text, true);
   input.value = '';
 }
 
@@ -926,9 +1001,11 @@ function handleData(data, senderId) {
   if(data.type === 'chat') {
     appendChat(senderId, data.text);
     if(isHost) { connections.forEach(c => { if(c.peer !== senderId) c.send(data); }); }
+  } else if (data.type === 'timeSync' && !isHost) { // Time syncing received from host
+    gameTime = data.time;
   } else {
     if(isHost) networkPlayers[senderId] = data;
-    else updateNetworkMeshes(data, myPeerId);
+    else updateNetworkMeshes(data, window.myPeerId);
   }
 }
 
@@ -948,7 +1025,7 @@ function updateNetworkMeshes(dataMap, myId) {
     if (id === myId) continue; 
     if (!playerMeshes[id]) playerMeshes[id] = createPlayerMesh();
     const p = dataMap[id];
-    playerMeshes[id].position.lerp(new THREE.Vector3(p[0], p[1], p[2]), 0.3);
+    playerMeshes[id].position.lerp(new THREE.Vector3(p[0], p[1], p[2]), 0.5); // Smoothed interpolation
     playerMeshes[id].rotation.y = p[3];
   }
   for (let id in playerMeshes) {
@@ -959,9 +1036,9 @@ function updateNetworkMeshes(dataMap, myId) {
 const mpStatus = document.getElementById('mp-status');
 document.getElementById('btnHost').onclick = () => {
   if (peer) return;
-  mpStatus.innerHTML = "BOOTING..."; mpStatus.style.color = "#ffcc00";
+  mpStatus.innerHTML = "BOOTING...";
   peer = new Peer();
-  peer.on('open', (id) => { myPeerId = id; isHost = true; mpStatus.innerHTML = `HOST: ${id}`; mpStatus.style.color="#0f0"; });
+  peer.on('open', (id) => { window.myPeerId = id; isHost = true; mpStatus.innerHTML = `[ HOST ]`; });
   peer.on('connection', (conn) => {
     connections.push(conn);
     conn.on('data', (data) => handleData(data, conn.peer));
@@ -970,22 +1047,21 @@ document.getElementById('btnHost').onclick = () => {
 };
 document.getElementById('btnJoin').onclick = () => {
   if (peer) return;
-  const hostId = prompt("ENTER HOST ID:"); if (!hostId) return;
-  mpStatus.innerHTML = "LINKING..."; mpStatus.style.color = "#ffcc00";
+  const hostId = prompt("ENTER HOST ID TO JOIN:"); if (!hostId) return;
+  mpStatus.innerHTML = "LINKING...";
   peer = new Peer();
   peer.on('open', (id) => {
-    myPeerId = id; isHost = false; hostConnection = peer.connect(hostId);
-    hostConnection.on('open', () => { mpStatus.innerHTML = `LINKED`; mpStatus.style.color="#0f0"; });
+    window.myPeerId = id; isHost = false; hostConnection = peer.connect(hostId);
+    hostConnection.on('open', () => { mpStatus.innerHTML = `[ JOINED ]`; });
     hostConnection.on('data', (data) => handleData(data, hostConnection.peer));
-    hostConnection.on('close', () => { mpStatus.innerHTML = "LINK SEVERED"; mpStatus.style.color="#f00"; });
+    hostConnection.on('close', () => { mpStatus.innerHTML = "SEVERED"; });
   });
 };
 
 // ---------- POST-PROCESSING ----------
 const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
-// OPTIMIZATION: Slightly reduced bloom settings
-composer.addPass(new UnrealBloomPass(new THREE.Vector2(innerWidth/2, innerHeight/2), 0.7, 0.4, 0.85));
+composer.addPass(new UnrealBloomPass(new THREE.Vector2(innerWidth/2, innerHeight/2), 0.9, 0.4, 0.85)); // enhanced bloom
 
 const VHSShader = {
   uniforms: { tDiffuse: { value: null }, time: { value: 0 } },
@@ -1011,11 +1087,16 @@ const vhsPass = new ShaderPass(VHSShader);
 composer.addPass(vhsPass);
 
 // ---------- DAY/NIGHT CYCLE ----------
-let gameTime = Math.PI / 1000000; const daySpeed = 0.003; 
+let gameTime = Math.PI / 1000000; 
+let daySpeed = 0.003; 
 const phoneTimeDisplay = document.getElementById('phoneTime');
 
+window.changeTimeSpeed = function(newSpeed) {
+    if(isHost || !peer) daySpeed = newSpeed;
+}
+
 function updateEnvironment(dt) {
-  gameTime += dt * daySpeed;
+  if(isHost || !peer) gameTime += dt * daySpeed;
   const radius = 2000; 
   
   sunLight.position.set(Math.cos(gameTime) * radius, Math.sin(gameTime) * radius, Math.cos(gameTime) * radius * 0.5);
@@ -1036,6 +1117,8 @@ function updateEnvironment(dt) {
   if (isNightGlob) topColor.setHex(0x010205);
   skyMat.uniforms.topColor.value.copy(topColor);
   skyMat.uniforms.bottomColor.value.copy(currentSkyColor);
+  
+  scene.fog.color.copy(currentSkyColor).multiplyScalar(0.7); // Sync fog color to the sky
 
   sunLight.intensity = Math.max(0, sunHeight * 4.0); ambientLight.intensity = 0.05 + (sunHeight * 0.25);
 
@@ -1057,15 +1140,12 @@ const velocity = new THREE.Vector3(), direction = new THREE.Vector3();
 let stepTimer = 0, lastNetworkTick = 0, headBob = 0;
 
 function checkCollisions(playerPos) {
-  const playerRadius = 1.5; // Promień kolizji gracza
+  const playerRadius = 1.5; 
   allBuiltObjects.forEach(obj => {
-    // Proste sprawdzanie kolizji sferycznej (możesz rozbudować o BoundingBox dla większej precyzji)
     const dist = playerPos.distanceTo(obj.position);
-    if (dist < playerRadius + 2.0) { // Jeśli gracz jest zbyt blisko obiektu
-      // Odepchnij gracza w przeciwnym kierunku
+    if (dist < playerRadius + 2.0) { 
       const pushDir = new THREE.Vector3().subVectors(playerPos, obj.position).normalize();
       playerPos.add(pushDir.multiplyScalar(0.5));
-      playerPos.y = getHeight(playerPos.x, playerPos.z) + 3.5; // Utrzymaj na wysokości terenu
     }
   });
 }
@@ -1087,31 +1167,35 @@ function animate(now) {
 
     controls.moveRight(-velocity.x * dt); controls.moveForward(-velocity.z * dt);
     
+    // Improved Physics Gravity & Collision Application
+    yVelocity -= 40 * dt; // Gravity
+    pos.y += yVelocity * dt;
+
+    checkCollisions(pos);
+    
     const terrainY = getHeight(pos.x, pos.z);
     
-    if (isMoving) {
+    // Grounding Check
+    if (pos.y <= terrainY + 3.5) {
+        yVelocity = 0;
+        pos.y = terrainY + 3.5;
+        isGrounded = true;
+    }
+    
+    if (isMoving && isGrounded) {
       headBob += dt * 12; 
       stepTimer += dt; if (stepTimer > 0.35) { playFootstep(); stepTimer = 0; }
     } else { headBob = 0; stepTimer = 0.35; }
 
     const bobOffset = Math.sin(headBob) * 0.3;
-    pos.y += (terrainY + 3.5 + bobOffset - pos.y) * 0.15; 
+    if (isGrounded) pos.y += bobOffset * 0.15; // Smooth camera bobbing
     
     if(windFilter) windFilter.frequency.value = 300 + (pos.y * 5) + Math.sin(now * 0.001) * 200;
 
     listener.position.copy(pos);
   }
-  // ... wewnątrz funkcji animate()
-    controls.moveRight(-velocity.x * dt); 
-    controls.moveForward(-velocity.z * dt);
-    
-    // --- NOWA LOGIKA KOLIZJI ---
-    checkCollisions(pos);
-    // ---------------------------
-    
-    const terrainY = getHeight(pos.x, pos.z);
-// ... reszta kodu
-  if(isMoving && controls.isLocked) {
+  
+  if(isMoving && controls.isLocked && isGrounded) {
     legL.rotation.x = Math.sin(headBob) * 0.6;
     legR.rotation.x = -Math.sin(headBob) * 0.6;
   } else {
@@ -1167,13 +1251,20 @@ function animate(now) {
     rainMat.opacity = Math.max(rainMat.opacity - dt * 2.0, 0);
   }
 
-  if (myPeerId && now - lastNetworkTick > 50) {
+  // Network Sync Broadcast
+  if (window.myPeerId && now - lastNetworkTick > 50) {
     lastNetworkTick = now;
     const euler = new THREE.Euler().setFromQuaternion(camera.quaternion, "YXZ");
     const myData = [pos.x, pos.y, pos.z, euler.y];
     if (isHost) {
-      networkPlayers[myPeerId] = myData; updateNetworkMeshes(networkPlayers, myPeerId);
-      connections.forEach(c => { if(c.open) c.send(networkPlayers); });
+      networkPlayers[window.myPeerId] = myData; 
+      updateNetworkMeshes(networkPlayers, window.myPeerId);
+      connections.forEach(c => { 
+          if(c.open) { 
+              c.send(networkPlayers); 
+              c.send({type: 'timeSync', time: gameTime}); // Keep time perfectly synchronized across peers
+          }
+      });
     } else if (hostConnection && hostConnection.open) { hostConnection.send(myData); }
   }
 
@@ -1188,6 +1279,13 @@ function animate(now) {
     
     if(p.group.position.x > 4000) p.group.position.x = -4000; else if(p.group.position.x < -4000) p.group.position.x = 4000;
     if(p.group.position.z > 4000) p.group.position.z = -4000; else if(p.group.position.z < -4000) p.group.position.z = 4000;
+  });
+  
+  roadVehicles.forEach(v => {
+      v.mesh.position.z += v.speed * v.dir * dt;
+      v.mesh.position.y = getHeight(v.mesh.position.x, v.mesh.position.z) + 1.5; // Snap cars to highway
+      if(v.mesh.position.z > SIZE/2) v.mesh.position.z = -SIZE/2;
+      if(v.mesh.position.z < -SIZE/2) v.mesh.position.z = SIZE/2;
   });
 
   clouds.forEach(c => {
